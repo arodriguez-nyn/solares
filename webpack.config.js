@@ -1,4 +1,3 @@
-
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
@@ -11,6 +10,19 @@ const BabelRules = {
 const CSSRules = {
     test: /\.css$/i,
     use: ['style-loader', 'css-loader'],
+}
+
+const ImageRules = {
+    test: /\.(woff(2)?|ttf|otf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+    use: [
+        {
+            loader: 'file-loader',
+            options: {
+                name: '[name].[ext]',
+                outputPath: 'static/fonts/',
+            },
+        },
+    ],
 }
 
 module.exports = {
@@ -28,7 +40,7 @@ module.exports = {
         historyApiFallback: true,
     },
     module: {
-        rules: [BabelRules, CSSRules],
+        rules: [BabelRules, CSSRules, ImageRules],
     },
     resolve: {
         extensions: ['.js'],

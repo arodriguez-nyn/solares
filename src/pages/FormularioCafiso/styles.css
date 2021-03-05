@@ -1,0 +1,27 @@
+.linea1,
+.linea2,
+.linea3,
+.linea4 {
+    grid-template-columns: 1fr 1fr;
+}
+.linea1__bloque1 {
+    display: flex;
+    justify-content: space-between;
+}
+
+.linea3__bloque1 {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: 1fr 4fr;
+}
+
+.linea3__bloque2 {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: 1fr 1fr 3fr;
+}
+
+.dosbloques {
+    display: flex;
+    justify-content: space-between;
+}
