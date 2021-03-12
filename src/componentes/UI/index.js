@@ -10,6 +10,7 @@ export const Campo = styled.input`
     margin-bottom: 0.8rem;
     line-height: 1.42857143;
     width: ${props => props.width || '100%'};
+    text-align: ${props => props.alineacion || 'left'};
 
     :focus {
         outline: none;

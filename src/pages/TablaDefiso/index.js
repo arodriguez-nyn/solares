@@ -4,6 +4,7 @@ import React, { useState, useEffect, useContext } from 'react'
 import { progress } from '@progress/jsdo-core'
 import { useHistory } from 'react-router-dom'
 import { obtenerConexion } from '../../services'
+import { formateaNumero } from '../../util'
 
 // Componentes
 import {
@@ -13,11 +14,15 @@ import {
     WrapperTabla,
 } from '../../componentes/UI'
 import Alerta from '../../componentes/Alerta'
-import { parametrosConsulta, contarRegistros } from '../../services'
 import Navegacion from '../../componentes/Navegacion'
+
+// Hooks
+import useNavegacion from '../../hooks/useNavegacion'
 
 // Contexto
 import AppContext from '../../context/AppContext'
+
+import './styles.css'
 
 const TablaDefiso = () => {
     /* -------------------------------------------------------------------- */
@@ -36,9 +41,12 @@ const TablaDefiso = () => {
     } = useContext(AppContext)
     const [mensaje, setMensaje] = useState(null)
     const history = useHistory()
-    const [paginaActual, setPaginaActual] = useState(0)
-    const [numeroPaginas, setNumeroPaginas] = useState(0)
-    const [numeroRegistros, setNumeroRegistros] = useState(0)
+    // const [paginaActual, setPaginaActual] = useState(0)
+    // const [numeroPaginas, setNumeroPaginas] = useState(0)
+    // const [numeroRegistros, setNumeroRegistros] = useState(0)
+
+    // Datos para la navegación
+    const tabla = 'defiso'
 
     /* -------------------------------------------------------------------- */
     /* ----------------------------- FUNCIONES ---------------------------- */
@@ -46,13 +54,9 @@ const TablaDefiso = () => {
     const obtenerRegistros = filtro => {
         obtenerConexion().then(() => {
             const jsdo = new progress.data.JSDO({ name: 'defiso' })
-
-            console.log(filtro)
-
             jsdo.fill(filtro).then(
                 jsdo => {
                     const { success, request } = jsdo
-                    console.log(jsdo)
                     if (success) {
                         const lista = request.response.dsDEFISO.ttDEFISO
                         setLista(lista)
@@ -108,42 +112,63 @@ const TablaDefiso = () => {
         history.push('/formulario')
     }
 
-    const handleSiguiente = () => {
-        const pagina =
-            paginaActual < numeroPaginas ? paginaActual + 1 : numeroPaginas
+    // const handleSiguiente = () => {
+    //     const pagina =
+    //         paginaActual < numeroPaginas ? paginaActual + 1 : numeroPaginas
 
-        setPaginaActual(pagina)
-    }
+    //     setPaginaActual(pagina)
+    // }
 
-    const handleAnterior = () => {
-        const pagina = paginaActual > 1 ? paginaActual - 1 : paginaActual
+    // const handleAnterior = () => {
+    //     const pagina = paginaActual > 1 ? paginaActual - 1 : paginaActual
 
-        setPaginaActual(pagina)
-    }
+    //     setPaginaActual(pagina)
+    // }
 
-    const handlePrimero = () => {
-        setPaginaActual(1)
-    }
+    // const handlePrimero = () => {
+    //     setPaginaActual(1)
+    // }
 
-    const handleUltimo = () => {
-        setPaginaActual(numeroPaginas)
-    }
+    // const handleUltimo = () => {
+    //     setPaginaActual(numeroPaginas)
+    // }
 
-    const handleVolver = () => {
-        history.push('/formulario')
-    }
+    // const handleVolver = () => {
+    //     history.push('/formulario')
+    // }
+
+    // Hook para la paginación
+    const {
+        paginaActual,
+        numeroPaginas,
+        numeroRegistros,
+        setPaginaActual,
+        setAblFilter,
+        handlePrimero,
+        handleSiguiente,
+        handleAnterior,
+        handleUltimo,
+    } = useNavegacion({
+        tabla,
+        obtenerRegistros,
+    })
 
     /* -------------------------------------------------------------------- */
     /* ---------------------------- USE EFFECTS --------------------------- */
     /* -------------------------------------------------------------------- */
     useEffect(() => {
-        contarRegistros('NUMFIC = 1', 'defiso').then(numeroRegistros => {
-            setNumeroRegistros(numeroRegistros)
-            setNumeroPaginas(
-                Math.round(numeroRegistros / parametrosConsulta.lineasPorPagina)
-            )
-        })
+        // contarRegistros('NUMFIC = 1', 'defiso').then(numeroRegistros => {
+        //     setNumeroRegistros(numeroRegistros)
+        //     setNumeroPaginas(
+        //         Math.round(numeroRegistros / parametrosConsulta.lineasPorPagina)
+        //     )
+        // })
 
+        const ablFilter = registroActual
+            ? `NUMFIC = ${registroActual.numfic}`
+            : ''
+
+        setAblFilter(ablFilter)
         setPaginaActual(1)
 
         // Mensajes por acciones en otras pantallas
@@ -156,22 +181,7 @@ const TablaDefiso = () => {
         if (registroDetalleBorrado) {
             setMensaje('Registro borrado correctamente.')
         }
-    }, [])
-
-    useEffect(() => {
-        const parametros = {
-            skip:
-                (Math.max(paginaActual, 1) - 1) *
-                parametrosConsulta.lineasPorPagina,
-            top: parametrosConsulta.lineasPorPagina,
-        }
-
-        parametros.filter = registroActual
-            ? `NUMFIC = ${registroActual.numfic}`
-            : ''
-
-        paginaActual !== 0 && obtenerRegistros(parametros)
-    }, [paginaActual])
+    }, [registroActual])
 
     /* -------------------------------------------------------------------- */
     /* ---------------------------- RENDERIZADO --------------------------- */
@@ -217,17 +227,37 @@ const TablaDefiso = () => {
                                 >
                                     <td>{registro.FECENT}</td>
                                     <td>{registro.AGINMO_NOMBRE}</td>
-                                    <td>{registro.NUMTEL}</td>
-                                    <td>{registro.PRECBR}</td>
-                                    <td>{registro.PRECSR}</td>
-                                    <td>{registro.PRETOT}</td>
-                                    <td>{registro.REPEBR}</td>
-                                    <td>{registro.REPESR}</td>
+                                    <td className='align-right'>
+                                        {registro.NUMTEL}
+                                    </td>
+                                    <td className='align-right'>
+                                        {formateaNumero(registro.PRECBR)}
+                                    </td>
+                                    <td className='align-right'>
+                                        {formateaNumero(registro.PRECSR)}
+                                    </td>
+                                    <td className='align-right'>
+                                        {formateaNumero(registro.PRETOT)}
+                                    </td>
+                                    <td className='align-right'>
+                                        {formateaNumero(registro.REPEBR)}
+                                    </td>
+                                    <td className='align-right'>
+                                        {formateaNumero(registro.REPESR)}
+                                    </td>
                                     <td>{registro.ARREND}</td>
-                                    <td>{registro.RENTAB}</td>
-                                    <td>{registro.REPARR}</td>
-                                    <td>{registro.OFERTA}</td>
-                                    <td>{registro.REPOFE}</td>
+                                    <td className='align-right'>
+                                        {formateaNumero(registro.RENTAB)}
+                                    </td>
+                                    <td className='align-right'>
+                                        {formateaNumero(registro.REPARR)}
+                                    </td>
+                                    <td className='align-right'>
+                                        {formateaNumero(registro.OFERTA)}
+                                    </td>
+                                    <td className='align-right'>
+                                        {formateaNumero(registro.REPOFE)}
+                                    </td>
                                 </tr>
                             ))}
                     </tbody>
@@ -237,13 +267,13 @@ const TablaDefiso = () => {
                         <span>{`${numeroRegistros} registros`}</span>
                     )}
                     <div>
-                        <Boton
+                        {/* <Boton
                             width='120px'
                             type='button'
                             onClick={handleVolver}
                         >
                             Volver
-                        </Boton>
+                        </Boton> */}
                         <Boton
                             width='120px'
                             type='button'

@@ -1,9 +1,12 @@
-import React, { useState } from 'react'
+import { useState, useEffect } from 'react'
 
-const useNavegacion = () => {
+import { parametrosConsulta, contarRegistros } from '../services'
+
+const useNavegacion = ({ tabla, obtenerRegistros }) => {
     const [paginaActual, setPaginaActual] = useState(0)
     const [numeroPaginas, setNumeroPaginas] = useState(0)
     const [numeroRegistros, setNumeroRegistros] = useState(0)
+    const [ablFilter, setAblFilter] = useState(null)
 
     const handleSiguiente = () => {
         const pagina =
@@ -26,9 +29,45 @@ const useNavegacion = () => {
         setPaginaActual(numeroPaginas)
     }
 
+    useEffect(() => {
+        const parametros = {
+            skip:
+                (Math.max(paginaActual, 1) - 1) *
+                parametrosConsulta.lineasPorPagina,
+            top: parametrosConsulta.lineasPorPagina,
+        }
+        parametros.filter = ablFilter
+
+        paginaActual !== 0 && obtenerRegistros(parametros)
+    }, [paginaActual])
+
+    useEffect(() => {
+        /* Tenemos que poner específicamente !== null porque si está en blanco
+           no funciona la llamada condicional */
+        ablFilter !== null &&
+            contarRegistros(ablFilter, tabla).then(numeroRegistros => {
+                setNumeroRegistros(numeroRegistros)
+                setNumeroPaginas(
+                    Math.round(
+                        numeroRegistros / parametrosConsulta.lineasPorPagina
+                    )
+                )
+            })
+    }, [ablFilter])
+
     return {
         paginaActual,
         numeroPaginas,
         numeroRegistros,
+        setPaginaActual,
+        setAblFilter,
+        handlePrimero,
+        handleSiguiente,
+        handleAnterior,
+        handleUltimo,
+        setNumeroPaginas,
+        setNumeroRegistros,
     }
 }
+
+export default useNavegacion

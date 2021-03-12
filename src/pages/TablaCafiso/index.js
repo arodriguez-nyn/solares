@@ -13,11 +13,15 @@ import {
     WrapperTabla,
 } from '../../componentes/UI'
 import Alerta from '../../componentes/Alerta'
-import { parametrosConsulta, contarRegistros } from '../../services'
 import Navegacion from '../../componentes/Navegacion'
+
+// Hooks
+import useNavegacion from '../../hooks/useNavegacion'
 
 // Contexto
 import AppContext from '../../context/AppContext'
+
+import './styles.css'
 
 const TablaCafiso = () => {
     /* -------------------------------------------------------------------- */
@@ -35,9 +39,12 @@ const TablaCafiso = () => {
     } = useContext(AppContext)
     const [mensaje, setMensaje] = useState(null)
     const history = useHistory()
-    const [paginaActual, setPaginaActual] = useState(0)
-    const [numeroPaginas, setNumeroPaginas] = useState(0)
-    const [numeroRegistros, setNumeroRegistros] = useState(0)
+    // const [paginaActual, setPaginaActual] = useState(0)
+    // const [numeroPaginas, setNumeroPaginas] = useState(0)
+    // const [numeroRegistros, setNumeroRegistros] = useState(0)
+
+    // Datos para la navegación
+    const tabla = 'cafiso'
 
     /* -------------------------------------------------------------------- */
     /* ----------------------------- FUNCIONES ---------------------------- */
@@ -104,38 +111,55 @@ const TablaCafiso = () => {
         history.push('/formulario')
     }
 
-    const handleSiguiente = () => {
-        const pagina =
-            paginaActual < numeroPaginas ? paginaActual + 1 : numeroPaginas
+    // const handleSiguiente = () => {
+    //     const pagina =
+    //         paginaActual < numeroPaginas ? paginaActual + 1 : numeroPaginas
 
-        setPaginaActual(pagina)
-    }
+    //     setPaginaActual(pagina)
+    // }
 
-    const handleAnterior = () => {
-        const pagina = paginaActual > 1 ? paginaActual - 1 : paginaActual
+    // const handleAnterior = () => {
+    //     const pagina = paginaActual > 1 ? paginaActual - 1 : paginaActual
 
-        setPaginaActual(pagina)
-    }
+    //     setPaginaActual(pagina)
+    // }
 
-    const handlePrimero = () => {
-        setPaginaActual(1)
-    }
+    // const handlePrimero = () => {
+    //     setPaginaActual(1)
+    // }
 
-    const handleUltimo = () => {
-        setPaginaActual(numeroPaginas)
-    }
+    // const handleUltimo = () => {
+    //     setPaginaActual(numeroPaginas)
+    // }
+
+    // Hook para la paginación
+    const {
+        paginaActual,
+        numeroPaginas,
+        numeroRegistros,
+        setPaginaActual,
+        setAblFilter,
+        handlePrimero,
+        handleSiguiente,
+        handleAnterior,
+        handleUltimo,
+    } = useNavegacion({
+        tabla,
+        obtenerRegistros,
+    })
 
     /* -------------------------------------------------------------------- */
     /* ---------------------------- USE EFFECTS --------------------------- */
     /* -------------------------------------------------------------------- */
     useEffect(() => {
-        contarRegistros('', 'cafiso').then(numeroRegistros => {
-            setNumeroRegistros(numeroRegistros)
-            setNumeroPaginas(
-                Math.round(numeroRegistros / parametrosConsulta.lineasPorPagina)
-            )
-        })
+        // contarRegistros('', 'cafiso').then(numeroRegistros => {
+        //     setNumeroRegistros(numeroRegistros)
+        //     setNumeroPaginas(
+        //         Math.round(numeroRegistros / parametrosConsulta.lineasPorPagina)
+        //     )
+        // })
 
+        setAblFilter('')
         setPaginaActual(1)
 
         // Mensajes por acciones en otras pantallas
@@ -150,13 +174,13 @@ const TablaCafiso = () => {
         }
     }, [])
 
-    useEffect(() => {
-        const parametros = {
-            skip: (paginaActual - 1) * parametrosConsulta.lineasPorPagina,
-            top: parametrosConsulta.lineasPorPagina,
-        }
-        paginaActual !== 0 && obtenerRegistros(parametros)
-    }, [paginaActual])
+    // useEffect(() => {
+    //     const parametros = {
+    //         skip: (paginaActual - 1) * parametrosConsulta.lineasPorPagina,
+    //         top: parametrosConsulta.lineasPorPagina,
+    //     }
+    //     paginaActual !== 0 && obtenerRegistros(parametros)
+    // }, [paginaActual])
 
     /* -------------------------------------------------------------------- */
     /* ---------------------------- RENDERIZADO --------------------------- */
@@ -193,12 +217,16 @@ const TablaCafiso = () => {
                                     onClick={() => handleClick(registro)}
                                     key={registro.NUMFIC}
                                 >
-                                    <td>{registro.FICGEN}</td>
+                                    <td className='align-right'>
+                                        {registro.FICGEN}
+                                    </td>
                                     <td>{registro.DIRECC}</td>
                                     <td>{registro.LOCALI}</td>
                                     <td>{registro.PROSOL}</td>
                                     <td>{registro.TIPFIN_DESCRI}</td>
-                                    <td>{registro.CALURB_CODIGO}</td>
+                                    <td className='align-right'>
+                                        {registro.CALURB_CODIGO}
+                                    </td>
                                 </tr>
                             ))}
                     </tbody>

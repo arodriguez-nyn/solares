@@ -1,40 +1,14 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 
 // Dependencias
-import styled from 'styled-components'
+import { useHistory, useLocation } from 'react-router-dom'
 
-//import LoginContext from 'context/login/LoginContext'
-
-/* ------------------------------------------------------------------- */
-/* ------------------------- STYLED COMPONENTS ----------------------- */
-/* ------------------------------------------------------------------- */
-const CabeceraEstilos = styled.header`
-    display: flex;
-    position: fixed;
-    align-items: center;
-    justify-content: space-between;
-    top: 0;
-    width: 100%;
-    height: 3rem;
-    background-color: var(--primary-green);
-    color: #fff;
-    padding-left: 5px;
-    padding-right: 10px;
-    user-select: none;
-
-    img {
-        width: 180px;
-        height: auto;
-    }
-
-    span {
-        margin-left: 20px;
-    }
-
-    span:hover {
-        cursor: pointer;
-    }
-`
+// Componentes
+import {
+    CabeceraEstilos,
+    HistoricoEstilos,
+    WrapperEstilos,
+} from './styledComponents'
 
 const Cabecera = () => {
     /* ------------------------------------------------------------------- */
@@ -43,15 +17,77 @@ const Cabecera = () => {
     /*const { usuarioAutenticado } = useContext(LoginContext)
 
     if (!usuarioAutenticado) return*/
+    const history = useHistory()
+    const location = useLocation()
+    const [historialNavegacion, setHistorialNavegacion] = useState([])
+
+    /* -------------------------------------------------------------------- */
+    /* ----------------------------- FUNCIONES ---------------------------- */
+    /* -------------------------------------------------------------------- */
+    const handleClick = pantalla => {
+        console.log(pantalla.ruta)
+        history.push(pantalla.ruta)
+    }
+
+    /* -------------------------------------------------------------------- */
+    /* ---------------------------- USE EFFECTS --------------------------- */
+    /* -------------------------------------------------------------------- */
+    useEffect(() => {
+        const { pathname } = location
+        switch (pathname) {
+            case '/lista':
+                setHistorialNavegacion([])
+                break
+            case '/formulario':
+                setHistorialNavegacion([
+                    {
+                        ruta: '/lista',
+                        nombre: 'Lista de Solares',
+                    },
+                ])
+                break
+            case '/lista-detalle':
+                setHistorialNavegacion([
+                    {
+                        ruta: '/lista',
+                        nombre: 'Lista de Solares /',
+                    },
+                    {
+                        ruta: '/formulario',
+                        nombre: 'Formulario',
+                    },
+                ])
+                break
+        }
+    }, [location])
 
     return (
-        <CabeceraEstilos>
-            <img src='static/img/logo-horiz-nn-rgb-amarillo.svg' alt='Logo' />
-            <div>
-                {/* <i className="fas fa-user"></i> {usuarioAutenticado.CONCEP} */}
-                <span>Cerrar Sesión</span>
-            </div>
-        </CabeceraEstilos>
+        <WrapperEstilos>
+            <CabeceraEstilos>
+                <img
+                    src='static/img/logo-horiz-nn-rgb-amarillo.svg'
+                    alt='Logo'
+                />
+                <div>
+                    {/* <i className="fas fa-user"></i> {usuarioAutenticado.CONCEP} */}
+                    <span>Cerrar Sesión</span>
+                </div>
+            </CabeceraEstilos>
+            <HistoricoEstilos>
+                {historialNavegacion &&
+                    historialNavegacion.length > 0 &&
+                    historialNavegacion.map(pantalla => (
+                        <li
+                            key={pantalla.ruta}
+                            onClick={() => handleClick(pantalla)}
+                        >
+                            {pantalla.nombre}
+                        </li>
+                    ))}
+                {/* <span>Lista de Solares</span> / <span>Formulario</span> /{' '}
+                <span>Detalle del Solar</span> */}
+            </HistoricoEstilos>
+        </WrapperEstilos>
     )
 }
 

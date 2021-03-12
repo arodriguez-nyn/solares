@@ -21,6 +21,7 @@ import * as Yup from 'yup'
 import { progress } from '@progress/jsdo-core'
 import { useHistory } from 'react-router-dom'
 import { obtenerConexion } from '../../services'
+import NumberFormat from 'react-number-format'
 
 // Contexto
 import AppContext from '../../context/AppContext'
@@ -280,9 +281,9 @@ const FormularioCafiso = () => {
         setConfirmacion(false)
     }
 
-    const handleVolver = () => {
-        history.push('/lista')
-    }
+    // const handleVolver = () => {
+    //     history.push('/lista')
+    // }
 
     const handleNuevo = () => {
         setRegistroActual(null)
@@ -393,11 +394,8 @@ const FormularioCafiso = () => {
                 {formik => {
                     const {
                         values,
-                        errors,
-                        touched,
                         isValid,
                         dirty,
-                        resetForm,
                         handleBlur,
                         handleChange,
                         setFieldValue,
@@ -439,10 +437,10 @@ const FormularioCafiso = () => {
                                                         *
                                                     </CampoObligatorio>
                                                 </label>
-                                                <Campo
+                                                {/* <Campo
                                                     id='ficgen'
                                                     name='ficgen'
-                                                    type='number'
+                                                    type='text'
                                                     value={values.ficgen}
                                                     onChange={e =>
                                                         setFieldValue(
@@ -452,6 +450,30 @@ const FormularioCafiso = () => {
                                                     }
                                                     onBlur={handleBlur}
                                                     ref={numficRef}
+                                                /> */}
+                                                <NumberFormat
+                                                    alineacion='right'
+                                                    value={values.ficgen}
+                                                    thousandSeparator={true}
+                                                    customInput
+                                                    onChange={e =>
+                                                        setFieldValue(
+                                                            'ficgen',
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    customInput={alineacion => (
+                                                        <Campo
+                                                            alineacion={
+                                                                alineacion
+                                                            }
+                                                        />
+                                                    )}
+                                                    customInput={Campo}
+                                                    getInputRef={el =>
+                                                        (numficRef.current = el)
+                                                    }
+                                                    onBlur={handleBlur}
                                                 />
                                             </div>
                                         </BloqueCampo>
@@ -848,13 +870,13 @@ const FormularioCafiso = () => {
                                                 Guardar
                                             </BotonDisabled>
                                         )}
-                                        <Boton
+                                        {/* <Boton
                                             width='120px'
                                             type='button'
                                             onClick={handleVolver}
                                         >
                                             Volver
-                                        </Boton>
+                                        </Boton> */}
                                     </div>
                                 </footer>
                             </section>

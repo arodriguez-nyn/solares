@@ -37,6 +37,7 @@
         "file-loader": "^6.2.0",
         "husky": "^5.1.1",
         "prettier": "^2.2.1",
+        "react-number-format": "^4.4.4",
         "style-loader": "^2.0.0",
         "webpack": "^5.20.1",
         "webpack-cli": "^4.5.0",

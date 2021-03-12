@@ -5,11 +5,6 @@ import styled from 'styled-components'
 /* ------------------------- STYLED COMPONENTS ----------------------- */
 /* ------------------------------------------------------------------- */
 export const ContenedorEstilos = styled.section`
-    margin: 0 auto;
-    margin-top: 3rem;
-    min-height: calc(100vh - 3rem);
-    background-color: var(--background);
-    color: var(--font-color);
     padding: 1rem;
 
     h1 {
