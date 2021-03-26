@@ -58,6 +58,22 @@ const Cabecera = () => {
                     },
                 ])
                 break
+            case '/formulario-detalle':
+                setHistorialNavegacion([
+                    {
+                        ruta: '/lista',
+                        nombre: 'Lista de Solares /',
+                    },
+                    {
+                        ruta: '/formulario',
+                        nombre: 'Formulario /',
+                    },
+                    {
+                        ruta: '/lista-detalle',
+                        nombre: 'Lista del Detalle de Solares',
+                    },
+                ])
+                break
         }
     }, [location])
 

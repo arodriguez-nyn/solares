@@ -5,6 +5,7 @@ import FormularioCafiso from '../pages/FormularioCafiso'
 import TablaCafiso from '../pages/TablaCafiso'
 import Layout from '../componentes/Layout'
 import TablaDefiso from '../pages/TablaDefiso'
+import FormularioDefiso from '../pages/FormularioDefiso'
 
 // Dependencias
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
@@ -23,6 +24,11 @@ const MainApp = () => {
                             exact
                             path='/formulario'
                             component={FormularioCafiso}
+                        />
+                        <Route
+                            exact
+                            path='/formulario-detalle'
+                            component={FormularioDefiso}
                         />
                         <Route exact path='/lista' component={TablaCafiso} />
                         <Route

@@ -7,7 +7,9 @@ import { obtenerConexion } from '../../services'
 // Componentes
 import { Boton, ContenedorModalAyuda, TablaAyuda, WrapperAyuda } from '../UI'
 import Navegacion from '../../componentes/Navegacion'
-import { parametrosConsulta, contarRegistros } from '../../services'
+
+// Hooks
+import useNavegacion from '../../hooks/useNavegacion'
 
 const ModalAyudaCalificacionUrbanistica = ({
     mostrarModal,
@@ -18,9 +20,7 @@ const ModalAyudaCalificacionUrbanistica = ({
     /* --------------------- CONSTANTES Y DECLARACIONES ------------------- */
     /* -------------------------------------------------------------------- */
     const [lista, setLista] = useState([])
-    const [paginaActual, setPaginaActual] = useState(0)
-    const [numeroPaginas, setNumeroPaginas] = useState(0)
-    const [numeroRegistros, setNumeroRegistros] = useState(0)
+    const tabla = 'aginmo'
 
     /* -------------------------------------------------------------------- */
     /* ----------------------------- FUNCIONES ---------------------------- */
@@ -36,7 +36,6 @@ const ModalAyudaCalificacionUrbanistica = ({
                         if (success) {
                             const lista = request.response.dsCALURB.ttCALURB
                             setLista(lista)
-                            console.log(lista)
                         }
                     },
                     () => {
@@ -56,48 +55,30 @@ const ModalAyudaCalificacionUrbanistica = ({
         handleCancelarAyudaCalificacionUrbanistica()
     }
 
-    const handleSiguiente = () => {
-        const pagina =
-            paginaActual < numeroPaginas ? paginaActual + 1 : numeroPaginas
-
-        setPaginaActual(pagina)
-    }
-
-    const handleAnterior = () => {
-        const pagina = paginaActual > 1 ? paginaActual - 1 : paginaActual
-
-        setPaginaActual(pagina)
-    }
-
-    const handlePrimero = () => {
-        setPaginaActual(1)
-    }
-
-    const handleUltimo = () => {
-        setPaginaActual(numeroPaginas)
-    }
-
+    // Hook para la paginación
+    const {
+        paginaActual,
+        numeroPaginas,
+        numeroRegistros,
+        setPaginaActual,
+        setAblFilter,
+        handlePrimero,
+        handleSiguiente,
+        handleAnterior,
+        handleUltimo,
+    } = useNavegacion({
+        tabla,
+        obtenerRegistros,
+    })
     /* -------------------------------------------------------------------- */
     /* ---------------------------- USE EFFECTS --------------------------- */
     /* -------------------------------------------------------------------- */
     useEffect(() => {
-        contarRegistros('', 'calurb').then(numeroRegistros => {
-            setNumeroRegistros(numeroRegistros)
-            setNumeroPaginas(
-                Math.round(numeroRegistros / parametrosConsulta.lineasPorPagina)
-            )
-        })
+        if (!mostrarModal) return
 
-        mostrarModal && setPaginaActual(1)
+        setAblFilter('')
+        setPaginaActual(1)
     }, [mostrarModal])
-
-    useEffect(() => {
-        const parametros = {
-            skip: (paginaActual - 1) * parametrosConsulta.lineasPorPagina,
-            top: parametrosConsulta.lineasPorPagina,
-        }
-        paginaActual !== 0 && obtenerRegistros(parametros)
-    }, [paginaActual])
 
     /* -------------------------------------------------------------------- */
     /* ---------------------------- RENDERIZADO --------------------------- */

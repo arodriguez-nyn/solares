@@ -14,6 +14,18 @@ export const AppContextProvider = ({ children }) => {
         false
     )
 
+    const guardaRegistroActual = registro => {
+        setRegistroActual(registro)
+
+        localStorage.setItem('solares-cafiso', JSON.stringify(registro))
+    }
+
+    const guardaRegistroDetalleActual = registro => {
+        setRegistroDetalleActual(registro)
+
+        localStorage.setItem('solares-defiso', JSON.stringify(registro))
+    }
+
     return (
         <AppContext.Provider
             value={{
@@ -25,11 +37,11 @@ export const AppContextProvider = ({ children }) => {
                 registroDetalleCreado,
                 registroDetalleBorrado,
                 registroDetalleModificado,
-                setRegistroActual,
+                guardaRegistroActual,
                 setRegistroCreado,
                 setRegistroBorrado,
                 setRegistroModificado,
-                setRegistroDetalleActual,
+                guardaRegistroDetalleActual,
                 setRegistroDetalleCreado,
                 setRegistroDetalleBorrado,
                 setRegistroDetalleModificado,

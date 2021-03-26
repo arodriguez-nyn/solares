@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react'
 
 // Dependencias
-import { progress } from '@progress/jsdo-core'
 import { useHistory } from 'react-router-dom'
-import { obtenerConexion } from '../../services'
+import { formateaNumero } from '../../util'
 
 // Componentes
 import {
@@ -21,6 +20,9 @@ import useNavegacion from '../../hooks/useNavegacion'
 // Contexto
 import AppContext from '../../context/AppContext'
 
+// Servicios
+import { obtenerRegistrosCafiso } from '../../services/cafiso'
+
 import './styles.css'
 
 const TablaCafiso = () => {
@@ -32,16 +34,13 @@ const TablaCafiso = () => {
         registroCreado,
         registroModificado,
         registroBorrado,
-        setRegistroActual,
+        guardaRegistroActual,
         setRegistroCreado,
         setRegistroModificado,
         setRegistroBorrado,
     } = useContext(AppContext)
     const [mensaje, setMensaje] = useState(null)
     const history = useHistory()
-    // const [paginaActual, setPaginaActual] = useState(0)
-    // const [numeroPaginas, setNumeroPaginas] = useState(0)
-    // const [numeroRegistros, setNumeroRegistros] = useState(0)
 
     // Datos para la navegación
     const tabla = 'cafiso'
@@ -50,25 +49,36 @@ const TablaCafiso = () => {
     /* ----------------------------- FUNCIONES ---------------------------- */
     /* -------------------------------------------------------------------- */
     const obtenerRegistros = filtro => {
-        obtenerConexion().then(() => {
-            const jsdo = new progress.data.JSDO({ name: 'cafiso' })
-
-            jsdo.fill(filtro).then(
-                jsdo => {
-                    const { success, request } = jsdo
-                    if (success) {
-                        const lista = request.response.dsCAFISO.ttCAFISO
-                        setLista(lista)
-                    }
-                },
-                () => {
-                    console.log(
-                        'Error de lectura. No se han podido obtener los registros'
-                    )
-                }
-            )
+        obtenerRegistrosCafiso(filtro).then(jsdo => {
+            const { success, request } = jsdo
+            if (success) {
+                const lista = request.response.dsCAFISO.ttCAFISO
+                setLista(lista)
+            } else {
+                console.log(jsdo)
+            }
         })
     }
+    // const obtenerRegistros = filtro => {
+    //     obtenerConexion().then(() => {
+    //         const jsdo = new progress.data.JSDO({ name: 'cafiso' })
+
+    //         jsdo.fill(filtro).then(
+    //             jsdo => {
+    //                 const { success, request } = jsdo
+    //                 if (success) {
+    //                     const lista = request.response.dsCAFISO.ttCAFISO
+    //                     setLista(lista)
+    //                 }
+    //             },
+    //             () => {
+    //                 console.log(
+    //                     'Error de lectura. No se han podido obtener los registros'
+    //                 )
+    //             }
+    //         )
+    //     })
+    // }
 
     const handleClick = registro => {
         if (!registro) return
@@ -98,12 +108,12 @@ const TablaCafiso = () => {
             ficgen: registro.FICGEN,
         }
 
-        setRegistroActual(cafiso)
+        guardaRegistroActual(cafiso)
         history.push('/formulario')
     }
 
     const handleNuevo = () => {
-        setRegistroActual(null)
+        guardaRegistroActual(null)
         setRegistroCreado(null)
         setRegistroBorrado(null)
         setRegistroModificado(null)
@@ -152,14 +162,7 @@ const TablaCafiso = () => {
     /* ---------------------------- USE EFFECTS --------------------------- */
     /* -------------------------------------------------------------------- */
     useEffect(() => {
-        // contarRegistros('', 'cafiso').then(numeroRegistros => {
-        //     setNumeroRegistros(numeroRegistros)
-        //     setNumeroPaginas(
-        //         Math.round(numeroRegistros / parametrosConsulta.lineasPorPagina)
-        //     )
-        // })
-
-        setAblFilter('')
+        setAblFilter()
         setPaginaActual(1)
 
         // Mensajes por acciones en otras pantallas
@@ -218,13 +221,13 @@ const TablaCafiso = () => {
                                     key={registro.NUMFIC}
                                 >
                                     <td className='align-right'>
-                                        {registro.FICGEN}
+                                        {formateaNumero(registro.FICGEN)}
                                     </td>
                                     <td>{registro.DIRECC}</td>
                                     <td>{registro.LOCALI}</td>
                                     <td>{registro.PROSOL}</td>
                                     <td>{registro.TIPFIN_DESCRI}</td>
-                                    <td className='align-right'>
+                                    <td className='align-center'>
                                         {registro.CALURB_CODIGO}
                                     </td>
                                 </tr>

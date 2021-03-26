@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react'
 
 // Dependencias
-import { progress } from '@progress/jsdo-core'
 import { useHistory } from 'react-router-dom'
-import { obtenerConexion } from '../../services'
 import { formateaNumero } from '../../util'
 
 // Componentes
@@ -22,6 +20,9 @@ import useNavegacion from '../../hooks/useNavegacion'
 // Contexto
 import AppContext from '../../context/AppContext'
 
+// Servicios
+import { obtenerRegistrosDefiso } from '../../services/defiso'
+
 import './styles.css'
 
 const TablaDefiso = () => {
@@ -30,20 +31,18 @@ const TablaDefiso = () => {
     /* -------------------------------------------------------------------- */
     const [lista, setLista] = useState([])
     const {
+        registroActual,
         registroDetalleCreado,
         registroDetalleModificado,
         registroDetalleBorrado,
-        registroActual,
-        setRegistroDetalleActual,
+        registroDetalleActual,
+        guardaRegistroDetalleActual,
         setRegistroDetalleCreado,
         setRegistroDetalleModificado,
         setRegistroDetalleBorrado,
     } = useContext(AppContext)
     const [mensaje, setMensaje] = useState(null)
     const history = useHistory()
-    // const [paginaActual, setPaginaActual] = useState(0)
-    // const [numeroPaginas, setNumeroPaginas] = useState(0)
-    // const [numeroRegistros, setNumeroRegistros] = useState(0)
 
     // Datos para la navegación
     const tabla = 'defiso'
@@ -52,24 +51,36 @@ const TablaDefiso = () => {
     /* ----------------------------- FUNCIONES ---------------------------- */
     /* -------------------------------------------------------------------- */
     const obtenerRegistros = filtro => {
-        obtenerConexion().then(() => {
-            const jsdo = new progress.data.JSDO({ name: 'defiso' })
-            jsdo.fill(filtro).then(
-                jsdo => {
-                    const { success, request } = jsdo
-                    if (success) {
-                        const lista = request.response.dsDEFISO.ttDEFISO
-                        setLista(lista)
-                    }
-                },
-                () => {
-                    console.log(
-                        'Error de lectura. No se han podido obtener los registros'
-                    )
-                }
-            )
+        obtenerRegistrosDefiso(filtro).then(jsdo => {
+            const { success, request } = jsdo
+            if (success) {
+                const lista = request.response.dsDEFISO.ttDEFISO
+                setLista(lista)
+            } else {
+                console.log(jsdo)
+            }
         })
     }
+
+    // const obtenerRegistros = filtro => {
+    //     obtenerConexion().then(() => {
+    //         const jsdo = new progress.data.JSDO({ name: 'defiso' })
+    //         jsdo.fill(filtro).then(
+    //             jsdo => {
+    //                 const { success, request } = jsdo
+    //                 if (success) {
+    //                     const lista = request.response.dsDEFISO.ttDEFISO
+    //                     setLista(lista)
+    //                 }
+    //             },
+    //             () => {
+    //                 console.log(
+    //                     'Error de lectura. No se han podido obtener los registros'
+    //                 )
+    //             }
+    //         )
+    //     })
+    // }
 
     const handleClick = registro => {
         if (!registro) return
@@ -78,12 +89,14 @@ const TablaDefiso = () => {
         setRegistroDetalleBorrado(null)
         setRegistroDetalleModificado(null)
 
+        const fechaEntrega = registro.FECENT ? registro.FECENT : ''
+
         const defiso = {
             agente: registro.AGENTE,
-            nombreAgente: registro.AGINMO_NOMBRE,
+            aginmoNombre: registro.AGINMO_NOMBRE,
             arrend: registro.ARREND,
             codsit: registro.CODSIT,
-            fecent: registro.FECENT,
+            fecent: fechaEntrega,
             numfic: registro.NUMFIC,
             numlin: registro.NUMLIN,
             numtel: registro.NUMTEL,
@@ -91,51 +104,25 @@ const TablaDefiso = () => {
             oferta: registro.OFERTA,
             precbr: registro.PRECBR,
             precsr: registro.PRECSR,
-            pretoto: registro.PRETOT,
+            pretot: registro.PRETOT,
             rentab: registro.RENTAB,
             reparr: registro.REPARR,
             repebr: registro.REPEBR,
             repesr: registro.REPESR,
             repofe: registro.REPOFE,
         }
-
-        setRegistroActual(defiso)
-        //history.push('/formulario')
+        guardaRegistroDetalleActual(defiso)
+        history.push('/formulario-detalle')
     }
 
     const handleNuevo = () => {
-        setRegistroDetalleActual(null)
+        guardaRegistroDetalleActual(null)
         setRegistroDetalleCreado(null)
         setRegistroDetalleBorrado(null)
         setRegistroDetalleModificado(null)
 
-        history.push('/formulario')
+        history.push('/formulario-detalle')
     }
-
-    // const handleSiguiente = () => {
-    //     const pagina =
-    //         paginaActual < numeroPaginas ? paginaActual + 1 : numeroPaginas
-
-    //     setPaginaActual(pagina)
-    // }
-
-    // const handleAnterior = () => {
-    //     const pagina = paginaActual > 1 ? paginaActual - 1 : paginaActual
-
-    //     setPaginaActual(pagina)
-    // }
-
-    // const handlePrimero = () => {
-    //     setPaginaActual(1)
-    // }
-
-    // const handleUltimo = () => {
-    //     setPaginaActual(numeroPaginas)
-    // }
-
-    // const handleVolver = () => {
-    //     history.push('/formulario')
-    // }
 
     // Hook para la paginación
     const {
@@ -156,13 +143,14 @@ const TablaDefiso = () => {
     /* -------------------------------------------------------------------- */
     /* ---------------------------- USE EFFECTS --------------------------- */
     /* -------------------------------------------------------------------- */
+    // useEffect(() => {
+    //     const registroString = localStorage.getItem('solares-cafiso')
+    //     const registro = JSON.parse(registroString)
+    //     guardaRegistroActual(registro)
+    // }, [])
+
     useEffect(() => {
-        // contarRegistros('NUMFIC = 1', 'defiso').then(numeroRegistros => {
-        //     setNumeroRegistros(numeroRegistros)
-        //     setNumeroPaginas(
-        //         Math.round(numeroRegistros / parametrosConsulta.lineasPorPagina)
-        //     )
-        // })
+        if (!registroActual) return
 
         const ablFilter = registroActual
             ? `NUMFIC = ${registroActual.numfic}`
@@ -181,7 +169,7 @@ const TablaDefiso = () => {
         if (registroDetalleBorrado) {
             setMensaje('Registro borrado correctamente.')
         }
-    }, [registroActual])
+    }, [registroActual, registroDetalleActual])
 
     /* -------------------------------------------------------------------- */
     /* ---------------------------- RENDERIZADO --------------------------- */
@@ -225,7 +213,9 @@ const TablaDefiso = () => {
                                     onClick={() => handleClick(registro)}
                                     key={`${registro.NUMFIC}-${registro.NUMLIN}`}
                                 >
-                                    <td>{registro.FECENT}</td>
+                                    <td className='align-center'>
+                                        {registro.FECENT}
+                                    </td>
                                     <td>{registro.AGINMO_NOMBRE}</td>
                                     <td className='align-right'>
                                         {registro.NUMTEL}

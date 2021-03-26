@@ -35,7 +35,7 @@ export const CabeceraEstilos = styled.div`
 export const HistoricoEstilos = styled.ul`
     display: flex;
     justify-content: flex-end;
-    color: var(--font-color);
+    color: var(--primary-blue);
     margin-top: 1rem;
     margin-bottom: 0;
     margin-right: 1rem;

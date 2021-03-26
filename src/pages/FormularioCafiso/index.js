@@ -6,7 +6,8 @@ import {
     CampoError,
     CampoObligatorio,
     Boton,
-    BotonBuscar,
+    IconoBuscar,
+    IconoBorrar,
     BotonDisabled,
 } from '../../componentes/UI'
 import { FormularioEstilos, BloqueCampo } from './styledComponents'
@@ -18,15 +19,20 @@ import ModalAyudaCalificacionUrbanistica from '../../componentes/ModalAyudaCalif
 // Dependencias
 import { Formik } from 'formik'
 import * as Yup from 'yup'
-import { progress } from '@progress/jsdo-core'
 import { useHistory } from 'react-router-dom'
-import { obtenerConexion } from '../../services'
 import NumberFormat from 'react-number-format'
+
+// Servicios
+import { borrarCafiso, guardarCafiso } from '../../services/cafiso'
 
 // Contexto
 import AppContext from '../../context/AppContext'
 
-import './styles.css'
+// Hooks
+import useLeaveTipfin from '../../hooks/leave/useLeaveTipfin'
+import useLeaveCalurb from '../../hooks/leave/useLeaveCalurb'
+
+import styles from './styles.module.css'
 
 const FormularioCafiso = () => {
     /* -------------------------------------------------------------------- */
@@ -58,7 +64,7 @@ const FormularioCafiso = () => {
         registroCreado,
         registroModificado,
         registroBorrado,
-        setRegistroActual,
+        guardaRegistroActual,
         setRegistroCreado,
         setRegistroModificado,
         setRegistroBorrado,
@@ -70,7 +76,6 @@ const FormularioCafiso = () => {
         tipfin: Yup.number().required().min(1),
         califi: Yup.number().required().min(1),
     })
-    const useSubmit = true
     const [errorTipoFinca, setErrorTipoFinca] = useState(false)
     const [errorCalificacion, setErrorCalificacion] = useState(false)
     const [confirmacion, setConfirmacion] = useState(false)
@@ -81,25 +86,27 @@ const FormularioCafiso = () => {
     ] = useState(false)
 
     // Referencias para acceder al DOM de algunos campos
-    const numficRef = useRef()
+    const ficgenRef = useRef()
     const tipfinRef = useRef()
     const califiRef = useRef()
     const formRef = useRef()
 
+    const { setTipfinActual, leaveTipfin } = useLeaveTipfin()
+    const { setCalurbActual, leaveCalurb } = useLeaveCalurb()
+
     /* -------------------------------------------------------------------- */
     /* ----------------------------- FUNCIONES ---------------------------- */
     /* -------------------------------------------------------------------- */
-    const gestionErrores = error => {
-        const _mensaje = error.request.response._errors[0]._errorMsg
-        const inicio = _mensaje.indexOf(':') + 2
-        const fin = _mensaje.indexOf('(') - 1
-        setMensaje(_mensaje.substring(inicio, fin))
+    const gestionErrores = mensaje => {
+        const inicio = mensaje.indexOf(':') + 2
+        const fin = mensaje.indexOf('(') - 1
+        setMensaje(mensaje.substring(inicio, fin))
 
-        if (_mensaje.match(/tipo de finca/)) {
+        if (mensaje.match(/tipo de finca/)) {
             setErrorTipoFinca(true)
             tipfinRef.current.select()
         }
-        if (_mensaje.match(/calificación energética/)) {
+        if (mensaje.match(/calificación energética/)) {
             setErrorCalificacion(true)
             califiRef.current.select()
         }
@@ -113,46 +120,7 @@ const FormularioCafiso = () => {
             return
         }
 
-        const {
-            ficgen,
-            direcc,
-            numfic,
-            locali,
-            prosol,
-            tipfin,
-            califi,
-            calurb,
-            supsol,
-            profed,
-            arm,
-            longfa,
-            edacsr,
-            edacbr,
-            edposr,
-            edpobr,
-        } = values
-
-        obtenerConexion().then(() => {
-            const jsdo = new progress.data.JSDO({ name: 'cafiso' })
-            const dataSet = {
-                NUMFIC: numfic,
-                DIRECC: direcc,
-                LOCALI: locali,
-                TIPFIN: tipfin,
-                CALIFI: califi,
-                CALURB: calurb,
-                EDACSR: edacsr,
-                EDACBR: edacbr,
-                EDPOSR: edposr,
-                EDPOBR: edpobr,
-                PROSOL: prosol,
-                SUPSOL: supsol,
-                ARM: arm,
-                PROFED: profed,
-                LONGFA: longfa,
-                FICGEN: ficgen,
-            }
-
+        guardarCafiso(values, registroActual).then(respuesta => {
             /* Por defecto anulamos el state de las operaciones para que no salgan
                los mensajes en la pantalla de la lista
             */
@@ -160,45 +128,89 @@ const FormularioCafiso = () => {
             setRegistroBorrado(null)
             setRegistroModificado(null)
 
-            if (!registroActual) {
-                // Nuevo registro
-                jsdo.add(dataSet)
-                jsdo.saveChanges(useSubmit).then(
-                    jsdo => {
-                        const { success } = jsdo
-                        if (success) {
-                            setRegistroCreado(true)
-                            history.push('/lista')
-                        }
-                    },
-                    error => {
-                        gestionErrores(error)
-                    }
-                )
-            } else {
-                jsdo.fill(`NUMFIC = ${registroActual.numfic}`)
-                    .then(respuesta => {
-                        const cafiso = jsdo.ttCAFISO.findById(
-                            respuesta.jsdo.getId()
-                        )
-                        cafiso.assign(dataSet)
+            const { success } = respuesta
 
-                        return jsdo.saveChanges(useSubmit)
-                    })
-                    .then(
-                        jsdo => {
-                            const { success } = jsdo
-                            if (success) {
-                                setRegistroModificado(true)
-                                history.push('/lista')
-                            }
-                        },
-                        error => {
-                            gestionErrores(error)
-                        }
-                    )
+            if (success) {
+                if (registroActual) {
+                    setRegistroModificado(true)
+                } else {
+                    setRegistroCreado(true)
+                }
+
+                history.push('/lista')
+            } else {
+                const error = respuesta.request.response._errors[0]._errorMsg
+                gestionErrores(error)
             }
         })
+
+        // obtenerConexion().then(() => {
+        //     const jsdo = new progress.data.JSDO({ name: 'cafiso' })
+        //     const dataSet = {
+        //         NUMFIC: numfic,
+        //         DIRECC: direcc,
+        //         LOCALI: locali,
+        //         TIPFIN: tipfin,
+        //         CALIFI: califi,
+        //         CALURB: calurb,
+        //         EDACSR: edacsr,
+        //         EDACBR: edacbr,
+        //         EDPOSR: edposr,
+        //         EDPOBR: edpobr,
+        //         PROSOL: prosol,
+        //         SUPSOL: supsol,
+        //         ARM: arm,
+        //         PROFED: profed,
+        //         LONGFA: longfa,
+        //         FICGEN: ficgen,
+        //     }
+
+        //     /* Por defecto anulamos el state de las operaciones para que no salgan
+        //        los mensajes en la pantalla de la lista
+        //     */
+        //     setRegistroCreado(null)
+        //     setRegistroBorrado(null)
+        //     setRegistroModificado(null)
+
+        //     if (!registroActual) {
+        //         // Nuevo registro
+        //         jsdo.add(dataSet)
+        //         jsdo.saveChanges(useSubmit).then(
+        //             jsdo => {
+        //                 const { success } = jsdo
+        //                 if (success) {
+        //                     setRegistroCreado(true)
+        //                     history.push('/lista')
+        //                 }
+        //             },
+        //             error => {
+        //                 gestionErrores(error)
+        //             }
+        //         )
+        //     } else {
+        //         jsdo.fill(`NUMFIC = ${registroActual.numfic}`)
+        //             .then(respuesta => {
+        //                 const cafiso = jsdo.ttCAFISO.findById(
+        //                     respuesta.jsdo.getId()
+        //                 )
+        //                 cafiso.assign(dataSet)
+
+        //                 return jsdo.saveChanges(useSubmit)
+        //             })
+        //             .then(
+        //                 jsdo => {
+        //                     const { success } = jsdo
+        //                     if (success) {
+        //                         setRegistroModificado(true)
+        //                         history.push('/lista')
+        //                     }
+        //                 },
+        //                 error => {
+        //                     gestionErrores(error)
+        //                 }
+        //             )
+        //     }
+        // })
     }
 
     const handleBorrar = () => {
@@ -217,76 +229,74 @@ const FormularioCafiso = () => {
         setRegistroBorrado(null)
         setRegistroModificado(null)
 
-        const {
-            ficgen,
-            direcc,
-            numfic,
-            locali,
-            prosol,
-            tipfin,
-            califi,
-            calurb,
-            supsol,
-            profed,
-            arm,
-            longfa,
-            edacsr,
-            edacbr,
-            edposr,
-            edpobr,
-        } = registroActual
+        borrarCafiso(registroActual).then(() => setRegistroBorrado(true))
 
-        obtenerConexion().then(() => {
-            const jsdo = new progress.data.JSDO({ name: 'cafiso' })
-            const dataSet = {
-                NUMFIC: numfic,
-                DIRECC: direcc,
-                LOCALI: locali,
-                TIPFIN: tipfin,
-                CALIFI: califi,
-                CALURB: calurb,
-                EDACSR: edacsr,
-                EDACBR: edacbr,
-                EDPOSR: edposr,
-                EDPOBR: edpobr,
-                PROSOL: prosol,
-                SUPSOL: supsol,
-                ARM: arm,
-                PROFED: profed,
-                LONGFA: longfa,
-                FICGEN: ficgen,
-            }
+        // const {
+        //     ficgen,
+        //     direcc,
+        //     numfic,
+        //     locali,
+        //     prosol,
+        //     tipfin,
+        //     califi,
+        //     calurb,
+        //     supsol,
+        //     profed,
+        //     arm,
+        //     longfa,
+        //     edacsr,
+        //     edacbr,
+        //     edposr,
+        //     edpobr,
+        // } = registroActual
 
-            jsdo.fill(`NUMFIC = ${registroActual.numfic}`)
-                .then(
-                    respuesta => {
-                        const cafiso = jsdo.ttCAFISO.findById(
-                            respuesta.jsdo.getId()
-                        )
-                        cafiso.remove(dataSet)
+        // obtenerConexion().then(() => {
+        //     const jsdo = new progress.data.JSDO({ name: 'cafiso' })
+        //     const dataSet = {
+        //         NUMFIC: numfic,
+        //         DIRECC: direcc,
+        //         LOCALI: locali,
+        //         TIPFIN: tipfin,
+        //         CALIFI: califi,
+        //         CALURB: calurb,
+        //         EDACSR: edacsr,
+        //         EDACBR: edacbr,
+        //         EDPOSR: edposr,
+        //         EDPOBR: edpobr,
+        //         PROSOL: prosol,
+        //         SUPSOL: supsol,
+        //         ARM: arm,
+        //         PROFED: profed,
+        //         LONGFA: longfa,
+        //         FICGEN: ficgen,
+        //     }
 
-                        return jsdo.saveChanges(useSubmit)
-                    },
-                    () => {
-                        console.log('Error while reading records.')
-                    }
-                )
-                .then(() => {
-                    setRegistroBorrado(true)
-                })
-        })
+        //     jsdo.fill(`NUMFIC = ${registroActual.numfic}`)
+        //         .then(
+        //             respuesta => {
+        //                 const cafiso = jsdo.ttCAFISO.findById(
+        //                     respuesta.jsdo.getId()
+        //                 )
+        //                 cafiso.remove(dataSet)
+
+        //                 return jsdo.saveChanges(useSubmit)
+        //             },
+        //             () => {
+        //                 console.log('Error while reading records.')
+        //             }
+        //         )
+        //         .then(() => {
+        //             setRegistroBorrado(true)
+        //         })
+        // })
     }
 
     const handleCancelarConfirmacion = () => {
         setConfirmacion(false)
     }
 
-    // const handleVolver = () => {
-    //     history.push('/lista')
-    // }
-
     const handleNuevo = () => {
-        setRegistroActual(null)
+        guardaRegistroActual(null)
         setInitialValues({
             numfic: 0,
             ficgen: 0,
@@ -339,9 +349,50 @@ const FormularioCafiso = () => {
         )
     }
 
+    const limpiarTipfin = () => {
+        formRef.current.setFieldValue('tipfin', '')
+        formRef.current.setFieldValue('tipfinDescri', '')
+    }
+
+    const limpiarCalifi = () => {
+        formRef.current.setFieldValue('califi', '')
+        formRef.current.setFieldValue('calurb', '')
+        formRef.current.setFieldValue('calurbDescri', '')
+    }
+
+    // const handleKeyDownTipfin = (e, setFieldValue, value) => {
+    //     e.preventDefault()
+
+    //     console.log(value)
+
+    //     if (e.key === 'F5') setAyudaTipoFinca(true)
+    //     else {
+    //         setFieldValue('tipfin', value + e.key)
+    //     }
+    // }
+
+    // const handleKeyDownCalifi = e => {
+    //     e.preventDefault()
+
+    //     if (e.key === 'F5') setAyudaCalificacionUrbanistica(true)
+    // }
+
     const handleDetalle = () => {
-        console.log(registroActual)
         history.push('/lista-detalle')
+    }
+
+    /* Leave del campo tipfin: buscamos la descripción del valor introducido */
+    const handleBlurTipfin = (e, setFieldValue) => {
+        const nuevoValor = parseInt(e.target.value)
+
+        leaveTipfin(nuevoValor, setFieldValue)
+    }
+
+    /* Leave del campo califi: buscamos la descripción del valor introducido */
+    const handleBlurCalurb = (e, setFieldValue) => {
+        const nuevoValor = parseInt(e.target.value)
+
+        leaveCalurb(nuevoValor, setFieldValue)
     }
 
     /* -------------------------------------------------------------------- */
@@ -350,9 +401,14 @@ const FormularioCafiso = () => {
     useEffect(() => {
         // Inicializaciones
         registroActual && setInitialValues(registroActual)
-        numficRef.current.select()
+        ficgenRef.current.select()
 
         setRegistroCreado(false)
+
+        if (registroActual) {
+            setTipfinActual(registroActual.tipfin)
+            setCalurbActual(registroActual.califi)
+        }
     }, [registroActual])
 
     useEffect(() => {
@@ -411,15 +467,17 @@ const FormularioCafiso = () => {
                             <section>
                                 <h2>Datos Generales</h2>
                                 <article>
-                                    <div className='linea1__bloque1'>
+                                    <div className={styles.dosbloques}>
                                         <div>
                                             <label htmlFor='numfic'>
                                                 Nº de Registro
                                             </label>
-                                            <Campo
+                                            <NumberFormat
                                                 id='numfic'
-                                                type='text'
-                                                disabled
+                                                name='numfic'
+                                                alineacion='right'
+                                                thousandSeparator={true}
+                                                disabled={true}
                                                 value={values.numfic}
                                                 onChange={e =>
                                                     setFieldValue(
@@ -427,6 +485,12 @@ const FormularioCafiso = () => {
                                                         e.target.value
                                                     )
                                                 }
+                                                customInput={alineacion => (
+                                                    <Campo
+                                                        alineacion={alineacion}
+                                                    />
+                                                )}
+                                                customInput={Campo}
                                             />
                                         </div>
                                         <BloqueCampo>
@@ -437,31 +501,19 @@ const FormularioCafiso = () => {
                                                         *
                                                     </CampoObligatorio>
                                                 </label>
-                                                {/* <Campo
+                                                <NumberFormat
                                                     id='ficgen'
                                                     name='ficgen'
-                                                    type='text'
-                                                    value={values.ficgen}
-                                                    onChange={e =>
-                                                        setFieldValue(
-                                                            'ficgen',
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    onBlur={handleBlur}
-                                                    ref={numficRef}
-                                                /> */}
-                                                <NumberFormat
                                                     alineacion='right'
                                                     value={values.ficgen}
                                                     thousandSeparator={true}
-                                                    customInput
-                                                    onChange={e =>
+                                                    allowNegative={false}
+                                                    onChange={e => {
                                                         setFieldValue(
                                                             'ficgen',
                                                             e.target.value
                                                         )
-                                                    }
+                                                    }}
                                                     customInput={alineacion => (
                                                         <Campo
                                                             alineacion={
@@ -471,14 +523,14 @@ const FormularioCafiso = () => {
                                                     )}
                                                     customInput={Campo}
                                                     getInputRef={el =>
-                                                        (numficRef.current = el)
+                                                        (ficgenRef.current = el)
                                                     }
                                                     onBlur={handleBlur}
                                                 />
                                             </div>
                                         </BloqueCampo>
                                     </div>
-                                    <div className='linea1__bloque2'>
+                                    <div className={styles.linea1__bloque2}>
                                         <label htmlFor='direcc'>
                                             Dirección
                                         </label>
@@ -531,7 +583,7 @@ const FormularioCafiso = () => {
                                     </div>
                                 </article>
                                 <article>
-                                    <div className='linea3__bloque1'>
+                                    <div className={styles.linea3__bloque1}>
                                         <div>
                                             <label htmlFor='tipfin'>
                                                 Tipo Finca
@@ -541,41 +593,86 @@ const FormularioCafiso = () => {
                                             </label>
                                             <BloqueCampo>
                                                 {errorTipoFinca ? (
-                                                    <CampoError
+                                                    <NumberFormat
                                                         id='tipfin'
-                                                        type='number'
+                                                        name='tipfin'
+                                                        alineacion='right'
                                                         value={values.tipfin}
+                                                        thousandSeparator={true}
+                                                        allowNegative={false}
                                                         onChange={e =>
                                                             setFieldValue(
                                                                 'tipfin',
                                                                 e.target.value
                                                             )
                                                         }
-                                                        onBlur={handleBlur}
-                                                        ref={tipfinRef}
+                                                        customInput={alineacion => (
+                                                            <CampoError
+                                                                alineacion={
+                                                                    alineacion
+                                                                }
+                                                            />
+                                                        )}
+                                                        customInput={CampoError}
+                                                        getInputRef={el =>
+                                                            (tipfinRef.current = el)
+                                                        }
+                                                        onBlur={e =>
+                                                            handleBlurTipfin(
+                                                                e,
+                                                                setFieldValue
+                                                            )
+                                                        }
                                                     />
                                                 ) : (
-                                                    <Campo
+                                                    <NumberFormat
                                                         id='tipfin'
-                                                        type='number'
+                                                        name='tipfin'
+                                                        alineacion='right'
                                                         value={values.tipfin}
-                                                        onChange={e =>
+                                                        allowNegative={false}
+                                                        thousandSeparator={true}
+                                                        onChange={e => {
                                                             setFieldValue(
                                                                 'tipfin',
                                                                 e.target.value
                                                             )
+                                                        }}
+                                                        customInput={alineacion => (
+                                                            <Campo
+                                                                alineacion={
+                                                                    alineacion
+                                                                }
+                                                            />
+                                                        )}
+                                                        customInput={Campo}
+                                                        getInputRef={el =>
+                                                            (tipfinRef.current = el)
                                                         }
-                                                        ref={tipfinRef}
+                                                        onBlur={e =>
+                                                            handleBlurTipfin(
+                                                                e,
+                                                                setFieldValue
+                                                            )
+                                                        }
                                                     />
                                                 )}
-                                                <BotonBuscar
+                                                <IconoBuscar
                                                     type='button'
+                                                    title='Seleccionar tipo de finca'
                                                     onClick={() =>
                                                         setAyudaTipoFinca(true)
                                                     }
                                                 >
-                                                    <i className='fas fa-search fa-lg'></i>
-                                                </BotonBuscar>
+                                                    <i className='fas fa-search'></i>
+                                                </IconoBuscar>
+                                                <IconoBorrar
+                                                    type='button'
+                                                    title='Borrar selección tipo de finca'
+                                                    onClick={limpiarTipfin}
+                                                >
+                                                    &times;
+                                                </IconoBorrar>
                                             </BloqueCampo>
                                         </div>
                                         <div>
@@ -594,7 +691,7 @@ const FormularioCafiso = () => {
                                             />
                                         </div>
                                     </div>
-                                    <div className='linea3__bloque2'>
+                                    <div className={styles.linea3__bloque2}>
                                         <div>
                                             <label htmlFor='califi'>
                                                 Cal. Urb.
@@ -604,42 +701,88 @@ const FormularioCafiso = () => {
                                             </label>
                                             <BloqueCampo>
                                                 {errorCalificacion ? (
-                                                    <CampoError
+                                                    <NumberFormat
                                                         id='califi'
-                                                        type='number'
+                                                        name='califi'
+                                                        alineacion='right'
                                                         value={values.califi}
+                                                        allowNegative={false}
+                                                        thousandSeparator={true}
                                                         onChange={e =>
                                                             setFieldValue(
                                                                 'califi',
                                                                 e.target.value
                                                             )
                                                         }
-                                                        ref={califiRef}
+                                                        customInput={alineacion => (
+                                                            <CampoError
+                                                                alineacion={
+                                                                    alineacion
+                                                                }
+                                                            />
+                                                        )}
+                                                        customInput={CampoError}
+                                                        getInputRef={el =>
+                                                            (califiRef.current = el)
+                                                        }
+                                                        onBlur={e =>
+                                                            handleBlurCalurb(
+                                                                e,
+                                                                setFieldValue
+                                                            )
+                                                        }
                                                     />
                                                 ) : (
-                                                    <Campo
+                                                    <NumberFormat
                                                         id='califi'
-                                                        type='number'
+                                                        name='califi'
+                                                        alineacion='right'
                                                         value={values.califi}
+                                                        allowNegative={false}
+                                                        thousandSeparator={true}
                                                         onChange={e =>
                                                             setFieldValue(
                                                                 'califi',
                                                                 e.target.value
                                                             )
                                                         }
-                                                        ref={califiRef}
+                                                        customInput={alineacion => (
+                                                            <Campo
+                                                                alineacion={
+                                                                    alineacion
+                                                                }
+                                                            />
+                                                        )}
+                                                        customInput={Campo}
+                                                        getInputRef={el =>
+                                                            (califiRef.current = el)
+                                                        }
+                                                        onBlur={e =>
+                                                            handleBlurCalurb(
+                                                                e,
+                                                                setFieldValue
+                                                            )
+                                                        }
                                                     />
                                                 )}
-                                                <BotonBuscar
+                                                <IconoBuscar
                                                     type='button'
+                                                    title='Seleccionar calificación urbanística'
                                                     onClick={() =>
                                                         setAyudaCalificacionUrbanistica(
                                                             true
                                                         )
                                                     }
                                                 >
-                                                    <i className='fas fa-search fa-lg'></i>
-                                                </BotonBuscar>
+                                                    <i className='fas fa-search'></i>
+                                                </IconoBuscar>
+                                                <IconoBorrar
+                                                    type='button'
+                                                    title='Borrar selección calificación urbanística'
+                                                    onClick={limpiarCalifi}
+                                                >
+                                                    &times;
+                                                </IconoBorrar>
                                             </BloqueCampo>
                                         </div>
                                         <div>
@@ -678,39 +821,57 @@ const FormularioCafiso = () => {
                                     </div>
                                 </article>
                                 <article>
-                                    <div className='dosbloques'>
+                                    <div className={styles.dosbloques}>
                                         <div>
                                             <label htmlFor='supsol'>
                                                 Superficie
                                             </label>
-                                            <Campo
+                                            <NumberFormat
                                                 id='supsol'
-                                                type='number'
+                                                name='supsol'
+                                                alineacion='right'
                                                 value={values.supsol}
+                                                allowNegative={false}
+                                                thousandSeparator={true}
                                                 onChange={e =>
                                                     setFieldValue(
                                                         'supsol',
                                                         e.target.value
                                                     )
                                                 }
+                                                customInput={alineacion => (
+                                                    <Campo
+                                                        alineacion={alineacion}
+                                                    />
+                                                )}
+                                                customInput={Campo}
                                             />
                                         </div>
                                         <div>
                                             <label>Prof. Edif.</label>
-                                            <Campo
+                                            <NumberFormat
                                                 id='profed'
-                                                type='number'
+                                                name='profed'
+                                                alineacion='right'
                                                 value={values.profed}
+                                                allowNegative={false}
+                                                thousandSeparator={true}
                                                 onChange={e =>
                                                     setFieldValue(
                                                         'profed',
                                                         e.target.value
                                                     )
                                                 }
+                                                customInput={alineacion => (
+                                                    <Campo
+                                                        alineacion={alineacion}
+                                                    />
+                                                )}
+                                                customInput={Campo}
                                             />
                                         </div>
                                     </div>
-                                    <div className='dosbloques'>
+                                    <div className={styles.dosbloques}>
                                         <div>
                                             <label htmlFor='arm'>ARM</label>
                                             <Campo
@@ -727,17 +888,25 @@ const FormularioCafiso = () => {
                                         </div>
                                         <div>
                                             <label>Longitud</label>
-                                            <Campo
-                                                id='longfa'
-                                                type='number'
-                                                onChange={handleChange}
-                                                value={values.longfa}
+                                            <NumberFormat
+                                                id='profed'
+                                                name='profed'
+                                                alineacion='right'
+                                                value={values.profed}
+                                                allowNegative={false}
+                                                thousandSeparator={true}
                                                 onChange={e =>
                                                     setFieldValue(
-                                                        'longfa',
+                                                        'profed',
                                                         e.target.value
                                                     )
                                                 }
+                                                customInput={alineacion => (
+                                                    <Campo
+                                                        alineacion={alineacion}
+                                                    />
+                                                )}
+                                                customInput={Campo}
                                             />
                                         </div>
                                     </div>
@@ -746,71 +915,107 @@ const FormularioCafiso = () => {
                             <section>
                                 <h2>Edificabilidad</h2>
                                 <article>
-                                    <div className='dosbloques'>
+                                    <div className={styles.dosbloques}>
                                         <div>
                                             <label htmlFor='edacsr'>
                                                 Actual s/Rasante
                                             </label>
-                                            <Campo
+                                            <NumberFormat
                                                 id='edacsr'
-                                                type='number'
+                                                name='edacsr'
+                                                alineacion='right'
                                                 value={values.edacsr}
+                                                allowNegative={false}
+                                                thousandSeparator={true}
                                                 onChange={e =>
                                                     setFieldValue(
                                                         'edacsr',
                                                         e.target.value
                                                     )
                                                 }
+                                                customInput={alineacion => (
+                                                    <Campo
+                                                        alineacion={alineacion}
+                                                    />
+                                                )}
+                                                customInput={Campo}
                                             />
                                         </div>
                                         <div>
                                             <label htmlFor='edacbr'>
                                                 Actual b/Rasante
                                             </label>
-                                            <Campo
+                                            <NumberFormat
                                                 id='edabsr'
-                                                type='number'
-                                                value={values.edacbr}
+                                                name='edabsr'
+                                                alineacion='right'
+                                                value={values.edabsr}
+                                                allowNegative={false}
+                                                thousandSeparator={true}
                                                 onChange={e =>
                                                     setFieldValue(
-                                                        'edacbr',
+                                                        'edabsr',
                                                         e.target.value
                                                     )
                                                 }
+                                                customInput={alineacion => (
+                                                    <Campo
+                                                        alineacion={alineacion}
+                                                    />
+                                                )}
+                                                customInput={Campo}
                                             />
                                         </div>
                                     </div>
-                                    <div className='dosbloques'>
+                                    <div className={styles.dosbloques}>
                                         <div>
                                             <label htmlFor='edposr'>
                                                 Potencial s/Rasante
                                             </label>
-                                            <Campo
+                                            <NumberFormat
                                                 id='edposr'
-                                                type='number'
-                                                value={values.edaposr}
+                                                name='edposr'
+                                                alineacion='right'
+                                                value={values.edposr}
+                                                allowNegative={false}
+                                                thousandSeparator={true}
                                                 onChange={e =>
                                                     setFieldValue(
                                                         'edposr',
                                                         e.target.value
                                                     )
                                                 }
+                                                customInput={alineacion => (
+                                                    <Campo
+                                                        alineacion={alineacion}
+                                                    />
+                                                )}
+                                                customInput={Campo}
                                             />
                                         </div>
                                         <div>
                                             <label htmlFor='edpobr'>
                                                 Potencial b/Rasante
                                             </label>
-                                            <Campo
+                                            <NumberFormat
                                                 id='edpobr'
-                                                type='number'
-                                                value={values.edapobr}
+                                                name='edpobr'
+                                                alineacion='right'
+                                                value={values.edpobr}
+                                                allowNegative={false}
+                                                thousandSeparator={true}
                                                 onChange={e =>
                                                     setFieldValue(
                                                         'edpobr',
                                                         e.target.value
                                                     )
                                                 }
+                                                customInput={alineacion => (
+                                                    <Campo
+                                                        alineacion={alineacion}
+                                                    />
+                                                )}
+                                                customInput={Campo}
                                             />
                                         </div>
                                     </div>
@@ -870,13 +1075,6 @@ const FormularioCafiso = () => {
                                                 Guardar
                                             </BotonDisabled>
                                         )}
-                                        {/* <Boton
-                                            width='120px'
-                                            type='button'
-                                            onClick={handleVolver}
-                                        >
-                                            Volver
-                                        </Boton> */}
                                     </div>
                                 </footer>
                             </section>

@@ -24,8 +24,8 @@ export const obtenerConexion = () => {
 export const contarRegistros = (filtro, tabla) => {
     return obtenerConexion().then(() => {
         const jsdo = new progress.data.JSDO({ name: tabla })
-        //const ablFilter = { filter: filtro }
-        const ablFilter = { filter: 'TIPFIN = 2' }
+        //const filter = { filter: 'TIPFIN = 2' }
+        const ablFilter = { filter: filtro }
 
         return jsdo.invoke('count', ablFilter).then(
             jsdo => {

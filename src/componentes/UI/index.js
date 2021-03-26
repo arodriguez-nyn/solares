@@ -91,10 +91,30 @@ export const BotonDisabled = styled.button`
     }
 `
 
-export const BotonBuscar = styled.button`
+export const IconoBuscar = styled.button`
     width: 20px;
     height: 20px;
     margin-left: 0.25rem;
+    border: none;
+    background-color: transparent;
+    color: var(--font-color);
+
+    :hover {
+        cursor: pointer;
+    }
+
+    :focus {
+        outline: none;
+    }
+`
+
+export const IconoBorrar = styled.button`
+    font-size: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    margin-left: 0.5rem;
+    line-height: 0.8;
     border: none;
     background-color: transparent;
     color: var(--font-color);
@@ -334,5 +354,22 @@ export const TablaEstilos = styled.table`
 
     th:first-child {
         border-left: none;
+    }
+`
+export const Editor = styled.textarea`
+    color: var(--font-color);
+    padding: 0.15rem 0.55rem;
+    border: none;
+    border: 1px solid #d2d6de;
+    border-radius: 2px;
+    line-height: 1.42857143;
+    width: ${props => props.width || '100%'};
+
+    :focus {
+        outline: none;
+        border: 3px solid var(--secondary-blue);
+        box-shadow: 0 0 2px #c3c3c3 inset;
+        background-color: var(--background-focus);
+        color: var(--font-color);
     }
 `

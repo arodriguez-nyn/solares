@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-import { parametrosConsulta, contarRegistros } from '../services'
+import { parametrosConsulta, contarRegistros } from '../services/comun'
 
 const useNavegacion = ({ tabla, obtenerRegistros }) => {
     const [paginaActual, setPaginaActual] = useState(0)
@@ -39,7 +39,7 @@ const useNavegacion = ({ tabla, obtenerRegistros }) => {
         parametros.filter = ablFilter
 
         paginaActual !== 0 && obtenerRegistros(parametros)
-    }, [paginaActual])
+    }, [ablFilter, paginaActual])
 
     useEffect(() => {
         /* Tenemos que poner específicamente !== null porque si está en blanco

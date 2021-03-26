@@ -6,21 +6,21 @@ import { obtenerConexion } from '../../services'
 
 // Componentes
 import { Boton, ContenedorModalAyuda, TablaAyuda, WrapperAyuda } from '../UI'
-import Navegacion from '../../componentes/Navegacion'
+import Navegacion from '../Navegacion'
 
 // Hooks
 import useNavegacion from '../../hooks/useNavegacion'
 
-const ModalAyudaTipoFinca = ({
+const ModalAyudaAgente = ({
     mostrarModal,
-    handleAceptarAyudaTipoFinca,
-    handleCancelarAyudaTipoFinca,
+    handleAceptarAyudaAgente,
+    handleCancelarAyudaAgente,
 }) => {
     /* -------------------------------------------------------------------- */
     /* --------------------- CONSTANTES Y DECLARACIONES ------------------- */
     /* -------------------------------------------------------------------- */
     const [lista, setLista] = useState([])
-    const tabla = 'tipfin'
+    const tabla = 'aginmo'
 
     /* -------------------------------------------------------------------- */
     /* ----------------------------- FUNCIONES ---------------------------- */
@@ -28,13 +28,13 @@ const ModalAyudaTipoFinca = ({
     const obtenerRegistros = filtro => {
         mostrarModal &&
             obtenerConexion().then(() => {
-                const jsdo = new progress.data.JSDO({ name: 'tipfin' })
+                const jsdo = new progress.data.JSDO({ name: 'aginmo' })
 
                 jsdo.fill(filtro).then(
                     jsdo => {
                         const { success, request } = jsdo
                         if (success) {
-                            const lista = request.response.dsTIPFIN.ttTIPFIN
+                            const lista = request.response.dsAGINMO.ttAGINMO
                             setLista(lista)
                         }
                     },
@@ -48,11 +48,11 @@ const ModalAyudaTipoFinca = ({
     }
 
     const handleClick = registro => {
-        handleAceptarAyudaTipoFinca(registro)
+        handleAceptarAyudaAgente(registro)
     }
 
     const handleCancel = () => {
-        handleCancelarAyudaTipoFinca()
+        handleCancelarAyudaAgente()
     }
 
     // Hook para la paginación
@@ -103,7 +103,7 @@ const ModalAyudaTipoFinca = ({
                             <thead>
                                 <tr>
                                     <th>Código</th>
-                                    <th>Descripción</th>
+                                    <th>Nombre</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -113,10 +113,10 @@ const ModalAyudaTipoFinca = ({
                                             onClick={() =>
                                                 handleClick(registro)
                                             }
-                                            key={registro.CODTIP}
+                                            key={registro.CODAGE}
                                         >
-                                            <td>{registro.CODTIP}</td>
-                                            <td>{registro.DESCRI}</td>
+                                            <td>{registro.CODAGE}</td>
+                                            <td>{registro.NOMBRE}</td>
                                         </tr>
                                     ))}
                             </tbody>
@@ -140,4 +140,4 @@ const ModalAyudaTipoFinca = ({
     )
 }
 
-export default ModalAyudaTipoFinca
+export default ModalAyudaAgente
