@@ -12,8 +12,8 @@ import {
 } from '../../componentes/UI'
 import { FormularioEstilos, BloqueCampo } from './styledComponents'
 import Alerta from '../../componentes/Alerta'
-import ModalConfirmacion from '../../componentes/ModalConfirmacion'
-import ModalAyudaAgente from '../../componentes/ModalAyudaAgente'
+import ModalConfirmacion from '../../componentes/modales/ModalConfirmacion'
+import ModalAyudaAgente from '../../componentes/modales/ModalAyudaAgente'
 
 // Dependencias
 import { Formik } from 'formik'

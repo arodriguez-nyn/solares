@@ -43,7 +43,7 @@ export const WrapperTabla = styled.div`
 `
 
 export const TablaEstilos = styled.table`
-    border: 1px solid #d6e9c6;
+    border: 1px solid var(--light-green);
     padding: 0.4rem;
     margin: 0 auto;
     width: 100%;

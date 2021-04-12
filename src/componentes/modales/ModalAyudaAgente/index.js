@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react'
 
 // Dependencias
-import { progress } from '@progress/jsdo-core'
-import { obtenerConexion } from '../../services'
+import { obtenerRegistrosAginmo } from '../../../services/aginmo'
 
 // Componentes
-import { Boton, ContenedorModalAyuda, TablaAyuda, WrapperAyuda } from '../UI'
-import Navegacion from '../Navegacion'
+import { Boton, ContenedorModalAyuda, TablaAyuda, WrapperAyuda } from '../../UI'
+import Navegacion from '../../Navegacion'
 
 // Hooks
-import useNavegacion from '../../hooks/useNavegacion'
+import useNavegacion from '../../../hooks/useNavegacion'
 
 const ModalAyudaAgente = ({
     mostrarModal,
@@ -27,23 +26,14 @@ const ModalAyudaAgente = ({
     /* -------------------------------------------------------------------- */
     const obtenerRegistros = filtro => {
         mostrarModal &&
-            obtenerConexion().then(() => {
-                const jsdo = new progress.data.JSDO({ name: 'aginmo' })
-
-                jsdo.fill(filtro).then(
-                    jsdo => {
-                        const { success, request } = jsdo
-                        if (success) {
-                            const lista = request.response.dsAGINMO.ttAGINMO
-                            setLista(lista)
-                        }
-                    },
-                    () => {
-                        console.log(
-                            'Error de lectura. No se han podido obtener los registros'
-                        )
-                    }
-                )
+            obtenerRegistrosAginmo(filtro).then(jsdo => {
+                const { success, request } = jsdo
+                if (success) {
+                    const lista = request.response.dsAGINMO.ttAGINMO
+                    setLista(lista)
+                } else {
+                    console.log(jsdo)
+                }
             })
     }
 

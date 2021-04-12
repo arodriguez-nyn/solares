@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react'
 
 // Dependencias
-import { progress } from '@progress/jsdo-core'
-import { obtenerConexion } from '../../services'
+import { obtenerRegistrosTipfin } from '../../../services/tipfin'
 
 // Componentes
-import { Boton, ContenedorModalAyuda, TablaAyuda, WrapperAyuda } from '../UI'
-import Navegacion from '../../componentes/Navegacion'
+import { Boton, ContenedorModalAyuda, TablaAyuda, WrapperAyuda } from '../../UI'
+import Navegacion from '../../../componentes/Navegacion'
 
 // Hooks
-import useNavegacion from '../../hooks/useNavegacion'
+import useNavegacion from '../../../hooks/useNavegacion'
 
 const ModalAyudaTipoFinca = ({
     mostrarModal,
@@ -27,23 +26,14 @@ const ModalAyudaTipoFinca = ({
     /* -------------------------------------------------------------------- */
     const obtenerRegistros = filtro => {
         mostrarModal &&
-            obtenerConexion().then(() => {
-                const jsdo = new progress.data.JSDO({ name: 'tipfin' })
-
-                jsdo.fill(filtro).then(
-                    jsdo => {
-                        const { success, request } = jsdo
-                        if (success) {
-                            const lista = request.response.dsTIPFIN.ttTIPFIN
-                            setLista(lista)
-                        }
-                    },
-                    () => {
-                        console.log(
-                            'Error de lectura. No se han podido obtener los registros'
-                        )
-                    }
-                )
+            obtenerRegistrosTipfin(filtro).then(jsdo => {
+                const { success, request } = jsdo
+                if (success) {
+                    const lista = request.response.dsTIFIN.ttTIPFIN
+                    setLista(lista)
+                } else {
+                    console.log(jsdo)
+                }
             })
     }
 

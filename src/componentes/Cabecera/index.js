@@ -1,14 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react'
-
-// Dependencias
-import { useHistory, useLocation } from 'react-router-dom'
+import React from 'react'
 
 // Componentes
-import {
-    CabeceraEstilos,
-    HistoricoEstilos,
-    WrapperEstilos,
-} from './styledComponents'
+import { CabeceraEstilos, WrapperEstilos } from './styledComponents'
 
 const Cabecera = () => {
     /* ------------------------------------------------------------------- */
@@ -17,65 +10,6 @@ const Cabecera = () => {
     /*const { usuarioAutenticado } = useContext(LoginContext)
 
     if (!usuarioAutenticado) return*/
-    const history = useHistory()
-    const location = useLocation()
-    const [historialNavegacion, setHistorialNavegacion] = useState([])
-
-    /* -------------------------------------------------------------------- */
-    /* ----------------------------- FUNCIONES ---------------------------- */
-    /* -------------------------------------------------------------------- */
-    const handleClick = pantalla => {
-        console.log(pantalla.ruta)
-        history.push(pantalla.ruta)
-    }
-
-    /* -------------------------------------------------------------------- */
-    /* ---------------------------- USE EFFECTS --------------------------- */
-    /* -------------------------------------------------------------------- */
-    useEffect(() => {
-        const { pathname } = location
-        switch (pathname) {
-            case '/lista':
-                setHistorialNavegacion([])
-                break
-            case '/formulario':
-                setHistorialNavegacion([
-                    {
-                        ruta: '/lista',
-                        nombre: 'Lista de Solares',
-                    },
-                ])
-                break
-            case '/lista-detalle':
-                setHistorialNavegacion([
-                    {
-                        ruta: '/lista',
-                        nombre: 'Lista de Solares /',
-                    },
-                    {
-                        ruta: '/formulario',
-                        nombre: 'Formulario',
-                    },
-                ])
-                break
-            case '/formulario-detalle':
-                setHistorialNavegacion([
-                    {
-                        ruta: '/lista',
-                        nombre: 'Lista de Solares /',
-                    },
-                    {
-                        ruta: '/formulario',
-                        nombre: 'Formulario /',
-                    },
-                    {
-                        ruta: '/lista-detalle',
-                        nombre: 'Lista del Detalle de Solares',
-                    },
-                ])
-                break
-        }
-    }, [location])
 
     return (
         <WrapperEstilos>
@@ -89,20 +23,6 @@ const Cabecera = () => {
                     <span>Cerrar Sesión</span>
                 </div>
             </CabeceraEstilos>
-            <HistoricoEstilos>
-                {historialNavegacion &&
-                    historialNavegacion.length > 0 &&
-                    historialNavegacion.map(pantalla => (
-                        <li
-                            key={pantalla.ruta}
-                            onClick={() => handleClick(pantalla)}
-                        >
-                            {pantalla.nombre}
-                        </li>
-                    ))}
-                {/* <span>Lista de Solares</span> / <span>Formulario</span> /{' '}
-                <span>Detalle del Solar</span> */}
-            </HistoricoEstilos>
         </WrapperEstilos>
     )
 }

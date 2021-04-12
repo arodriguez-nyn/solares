@@ -31,26 +31,3 @@ export const CabeceraEstilos = styled.div`
         cursor: pointer;
     }
 `
-
-export const HistoricoEstilos = styled.ul`
-    display: flex;
-    justify-content: flex-end;
-    color: var(--primary-blue);
-    margin-top: 1rem;
-    margin-bottom: 0;
-    margin-right: 1rem;
-    font-style: italic;
-    transition: all 0.3s ease;
-
-    li {
-        font-size: 1.1rem;
-        margin-left: 0.25rem;
-        margin-right: 0.25rem;
-    }
-
-    li:hover {
-        cursor: pointer;
-        color: var(--primary-green);
-        font-weight: bold;
-    }
-`

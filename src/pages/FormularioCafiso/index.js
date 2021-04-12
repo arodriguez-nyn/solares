@@ -12,9 +12,9 @@ import {
 } from '../../componentes/UI'
 import { FormularioEstilos, BloqueCampo } from './styledComponents'
 import Alerta from '../../componentes/Alerta'
-import ModalConfirmacion from '../../componentes/ModalConfirmacion'
-import ModalAyudaTipoFinca from '../../componentes/ModalAyudaTipoFinca'
-import ModalAyudaCalificacionUrbanistica from '../../componentes/ModalAyudaCalificacionUrbanistica'
+import ModalConfirmacion from '../../componentes/modales/ModalConfirmacion'
+import ModalAyudaTipoFinca from '../../componentes/modales/ModalAyudaTipoFinca'
+import ModalAyudaCalificacionUrbanistica from '../../componentes/modales/ModalAyudaCalificacionUrbanistica'
 
 // Dependencias
 import { Formik } from 'formik'

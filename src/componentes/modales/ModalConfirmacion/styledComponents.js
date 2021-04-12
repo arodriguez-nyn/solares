@@ -15,7 +15,7 @@ export const ModalEstilos = styled.div`
     background-color: rgba(0, 0, 0, 0.4);
     color: var(--font-color);
 
-    div {
+    > div {
         position: relative;
         top: 25%;
         left: 50%;

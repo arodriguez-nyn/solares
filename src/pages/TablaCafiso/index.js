@@ -13,6 +13,8 @@ import {
 } from '../../componentes/UI'
 import Alerta from '../../componentes/Alerta'
 import Navegacion from '../../componentes/Navegacion'
+import FiltroTablaCafiso from '../../componentes/FiltroTablaCafiso'
+import ModalLoading from '../../componentes/modales/ModalLoading'
 
 // Hooks
 import useNavegacion from '../../hooks/useNavegacion'
@@ -31,6 +33,7 @@ const TablaCafiso = () => {
     /* -------------------------------------------------------------------- */
     const [lista, setLista] = useState([])
     const {
+        filtroActual,
         registroCreado,
         registroModificado,
         registroBorrado,
@@ -41,6 +44,19 @@ const TablaCafiso = () => {
     } = useContext(AppContext)
     const [mensaje, setMensaje] = useState(null)
     const history = useHistory()
+    const [loading, setLoading] = useState(false)
+    const ordenacion = [
+        'Carpeta',
+        'Carpeta Desc',
+        'Dirección',
+        'Dirección Desc',
+        'Población',
+        'Población Desc',
+        'Tipo Inmueble',
+        'Tipo Inmueble Desc',
+        'Cal. Urbanística',
+        'Cal. Urbanística Desc',
+    ]
 
     // Datos para la navegación
     const tabla = 'cafiso'
@@ -49,36 +65,22 @@ const TablaCafiso = () => {
     /* ----------------------------- FUNCIONES ---------------------------- */
     /* -------------------------------------------------------------------- */
     const obtenerRegistros = filtro => {
+        setLoading(true)
         obtenerRegistrosCafiso(filtro).then(jsdo => {
+            setLoading(false)
             const { success, request } = jsdo
             if (success) {
                 const lista = request.response.dsCAFISO.ttCAFISO
-                setLista(lista)
+                if (lista) {
+                    setLista(lista)
+                } else {
+                    setLista(null)
+                }
             } else {
                 console.log(jsdo)
             }
         })
     }
-    // const obtenerRegistros = filtro => {
-    //     obtenerConexion().then(() => {
-    //         const jsdo = new progress.data.JSDO({ name: 'cafiso' })
-
-    //         jsdo.fill(filtro).then(
-    //             jsdo => {
-    //                 const { success, request } = jsdo
-    //                 if (success) {
-    //                     const lista = request.response.dsCAFISO.ttCAFISO
-    //                     setLista(lista)
-    //                 }
-    //             },
-    //             () => {
-    //                 console.log(
-    //                     'Error de lectura. No se han podido obtener los registros'
-    //                 )
-    //             }
-    //         )
-    //     })
-    // }
 
     const handleClick = registro => {
         if (!registro) return
@@ -121,26 +123,43 @@ const TablaCafiso = () => {
         history.push('/formulario')
     }
 
-    // const handleSiguiente = () => {
-    //     const pagina =
-    //         paginaActual < numeroPaginas ? paginaActual + 1 : numeroPaginas
+    const modificaOrdenacion = campo => {
+        let campoOrdenacion = ''
+        switch (campo) {
+            case 'Carpeta':
+                campoOrdenacion = 'FICGEN'
+                break
+            case 'Carpeta Desc':
+                campoOrdenacion = 'FICGEN DESC'
+                break
+            case 'Dirección':
+                campoOrdenacion = 'DIRECC'
+                break
+            case 'Dirección Desc':
+                campoOrdenacion = 'DIRECC DESC'
+                break
+            case 'Población':
+                campoOrdenacion = 'LOCALI'
+                break
+            case 'Población Desc':
+                campoOrdenacion = 'LOCALI DESC'
+                break
+            case 'Tipo Inmueble':
+                campoOrdenacion = 'TIPFIN_DESCRI'
+                break
+            case 'Tipo Inmueble Desc':
+                campoOrdenacion = 'TIPFIN_DESCRI DESC'
+                break
+            case 'Cal. Urbanística':
+                campoOrdenacion = 'CALURB_CODIGO'
+                break
+            case 'Cal. Urbanística Desc':
+                campoOrdenacion = 'CALURB_CODIGO DESC'
+                break
+        }
 
-    //     setPaginaActual(pagina)
-    // }
-
-    // const handleAnterior = () => {
-    //     const pagina = paginaActual > 1 ? paginaActual - 1 : paginaActual
-
-    //     setPaginaActual(pagina)
-    // }
-
-    // const handlePrimero = () => {
-    //     setPaginaActual(1)
-    // }
-
-    // const handleUltimo = () => {
-    //     setPaginaActual(numeroPaginas)
-    // }
+        setOrderBy(campoOrdenacion)
+    }
 
     // Hook para la paginación
     const {
@@ -149,10 +168,12 @@ const TablaCafiso = () => {
         numeroRegistros,
         setPaginaActual,
         setAblFilter,
+        setOrderBy,
         handlePrimero,
         handleSiguiente,
         handleAnterior,
         handleUltimo,
+        modificaNumeroLineas,
     } = useNavegacion({
         tabla,
         obtenerRegistros,
@@ -162,7 +183,14 @@ const TablaCafiso = () => {
     /* ---------------------------- USE EFFECTS --------------------------- */
     /* -------------------------------------------------------------------- */
     useEffect(() => {
-        setAblFilter()
+        // const filtroString = localStorage.getItem('solares-cafiso-filtro')
+        // if (filtroString) {
+        //     const filtro = JSON.parse(filtroString)
+        //     setAblFilter(filtro)
+        //     setPaginaActual(1)
+        // }
+
+        setAblFilter(filtroActual)
         setPaginaActual(1)
 
         // Mensajes por acciones en otras pantallas
@@ -175,75 +203,81 @@ const TablaCafiso = () => {
         if (registroBorrado) {
             setMensaje('Registro borrado correctamente.')
         }
-    }, [])
-
-    // useEffect(() => {
-    //     const parametros = {
-    //         skip: (paginaActual - 1) * parametrosConsulta.lineasPorPagina,
-    //         top: parametrosConsulta.lineasPorPagina,
-    //     }
-    //     paginaActual !== 0 && obtenerRegistros(parametros)
-    // }, [paginaActual])
+    }, [filtroActual])
 
     /* -------------------------------------------------------------------- */
     /* ---------------------------- RENDERIZADO --------------------------- */
     /* -------------------------------------------------------------------- */
     return (
-        <ContenedorTabla>
-            <h1>Solares</h1>
-            <WrapperTabla>
-                <Navegacion
-                    paginaActual={paginaActual}
-                    numeroPaginas={numeroPaginas}
-                    handleAnterior={handleAnterior}
-                    handleSiguiente={handleSiguiente}
-                    handlePrimero={handlePrimero}
-                    handleUltimo={handleUltimo}
-                />
-                <h2>Listado de Solares</h2>
-                {mensaje && <Alerta mensaje={mensaje} tipo='exito' />}
-                <TablaEstilos>
-                    <thead>
-                        <tr>
-                            <th>Carpeta</th>
-                            <th>Dirección</th>
-                            <th>Población</th>
-                            <th>Propietario</th>
-                            <th>Tipo Inmueble</th>
-                            <th>Cal. Urb</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {lista.length > 0 &&
-                            lista.map(registro => (
-                                <tr
-                                    onClick={() => handleClick(registro)}
-                                    key={registro.NUMFIC}
-                                >
-                                    <td className='align-right'>
-                                        {formateaNumero(registro.FICGEN)}
-                                    </td>
-                                    <td>{registro.DIRECC}</td>
-                                    <td>{registro.LOCALI}</td>
-                                    <td>{registro.PROSOL}</td>
-                                    <td>{registro.TIPFIN_DESCRI}</td>
-                                    <td className='align-center'>
-                                        {registro.CALURB_CODIGO}
-                                    </td>
-                                </tr>
-                            ))}
-                    </tbody>
-                </TablaEstilos>
-                <footer>
-                    {numeroRegistros !== 0 && (
-                        <span>{`${numeroRegistros} registros`}</span>
+        <>
+            <ModalLoading mostrarModal={loading} color='#fff' />
+            <ContenedorTabla>
+                <h1>Solares</h1>
+                <WrapperTabla>
+                    <FiltroTablaCafiso obtenerRegistros={obtenerRegistros} />
+                    {lista && (
+                        <Navegacion
+                            ordenacion={ordenacion}
+                            paginaActual={paginaActual}
+                            numeroPaginas={numeroPaginas}
+                            handleAnterior={handleAnterior}
+                            handleSiguiente={handleSiguiente}
+                            handlePrimero={handlePrimero}
+                            handleUltimo={handleUltimo}
+                            modificaNumeroLineas={modificaNumeroLineas}
+                            modificaOrdenacion={modificaOrdenacion}
+                        />
                     )}
-                    <Boton width='120px' type='button' onClick={handleNuevo}>
-                        Nuevo
-                    </Boton>
-                </footer>
-            </WrapperTabla>
-        </ContenedorTabla>
+                    <h2>Listado de Solares</h2>
+                    {mensaje && <Alerta mensaje={mensaje} tipo='exito' />}
+                    <TablaEstilos>
+                        <thead>
+                            <tr>
+                                <th>Carpeta</th>
+                                <th>Dirección</th>
+                                <th>Población</th>
+                                <th>Propietario</th>
+                                <th>Tipo Inmueble</th>
+                                <th>Cal. Urb</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {lista &&
+                                lista.length > 0 &&
+                                lista.map(registro => (
+                                    <tr
+                                        onClick={() => handleClick(registro)}
+                                        key={registro.NUMFIC}
+                                    >
+                                        <td className='align-right'>
+                                            {formateaNumero(registro.FICGEN)}
+                                        </td>
+                                        <td>{registro.DIRECC}</td>
+                                        <td>{registro.LOCALI}</td>
+                                        <td>{registro.PROSOL}</td>
+                                        <td>{registro.TIPFIN_DESCRI}</td>
+                                        <td className='align-center'>
+                                            {registro.CALURB_CODIGO}
+                                        </td>
+                                    </tr>
+                                ))}
+                        </tbody>
+                    </TablaEstilos>
+                    <footer>
+                        {numeroRegistros !== 0 && (
+                            <span>{`${numeroRegistros} registros`}</span>
+                        )}
+                        <Boton
+                            width='120px'
+                            type='button'
+                            onClick={handleNuevo}
+                        >
+                            Nuevo
+                        </Boton>
+                    </footer>
+                </WrapperTabla>
+            </ContenedorTabla>
+        </>
     )
 }
 

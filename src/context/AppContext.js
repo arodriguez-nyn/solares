@@ -13,6 +13,14 @@ export const AppContextProvider = ({ children }) => {
     const [registroDetalleModificado, setRegistroDetalleModificado] = useState(
         false
     )
+    const [paginaActual, setPaginaActual] = useState(null)
+    const [filtroActual, setFiltroActual] = useState('')
+    const [camposFiltro, setCamposFiltro] = useState({
+        FICGEN: 0,
+        DIRECC: '',
+        LOCALI: '',
+        PROSOL: '',
+    })
 
     const guardaRegistroActual = registro => {
         setRegistroActual(registro)
@@ -26,6 +34,19 @@ export const AppContextProvider = ({ children }) => {
         localStorage.setItem('solares-defiso', JSON.stringify(registro))
     }
 
+    const guardaFiltroActual = filtro => {
+        setFiltroActual(filtro)
+        //localStorage.setItem('solares-cafiso-filtro', JSON.stringify(filtro))
+    }
+
+    const guardaCamposFiltro = campos => {
+        setCamposFiltro(campos)
+        // localStorage.setItem(
+        //     'solares-cafiso-filtro-campos',
+        //     JSON.stringify(campos)
+        // )
+    }
+
     return (
         <AppContext.Provider
             value={{
@@ -37,6 +58,9 @@ export const AppContextProvider = ({ children }) => {
                 registroDetalleCreado,
                 registroDetalleBorrado,
                 registroDetalleModificado,
+                paginaActual,
+                filtroActual,
+                camposFiltro,
                 guardaRegistroActual,
                 setRegistroCreado,
                 setRegistroBorrado,
@@ -45,6 +69,9 @@ export const AppContextProvider = ({ children }) => {
                 setRegistroDetalleCreado,
                 setRegistroDetalleBorrado,
                 setRegistroDetalleModificado,
+                setPaginaActual,
+                guardaFiltroActual,
+                guardaCamposFiltro,
             }}
         >
             {children}

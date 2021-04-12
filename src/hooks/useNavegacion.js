@@ -1,12 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
-import { parametrosConsulta, contarRegistros } from '../services/comun'
+import AppContext from '../context/AppContext'
+
+import { contarRegistros } from '../services/comun'
 
 const useNavegacion = ({ tabla, obtenerRegistros }) => {
-    const [paginaActual, setPaginaActual] = useState(0)
+    const { paginaActual, setPaginaActual } = useContext(AppContext)
     const [numeroPaginas, setNumeroPaginas] = useState(0)
     const [numeroRegistros, setNumeroRegistros] = useState(0)
     const [ablFilter, setAblFilter] = useState(null)
+    const [orderBy, setOrderBy] = useState('NUMFIC')
+    const [numeroLineas, setNumeroLineas] = useState(10)
 
     const handleSiguiente = () => {
         const pagina =
@@ -29,31 +33,33 @@ const useNavegacion = ({ tabla, obtenerRegistros }) => {
         setPaginaActual(numeroPaginas)
     }
 
-    useEffect(() => {
-        const parametros = {
-            skip:
-                (Math.max(paginaActual, 1) - 1) *
-                parametrosConsulta.lineasPorPagina,
-            top: parametrosConsulta.lineasPorPagina,
-        }
-        parametros.filter = ablFilter
-
-        paginaActual !== 0 && obtenerRegistros(parametros)
-    }, [ablFilter, paginaActual])
+    const modificaNumeroLineas = lineas => {
+        setNumeroLineas(lineas)
+    }
 
     useEffect(() => {
         /* Tenemos que poner específicamente !== null porque si está en blanco
-           no funciona la llamada condicional */
-        ablFilter !== null &&
+            no funciona la llamada condicional */
+        if (ablFilter !== null && paginaActual !== 0) {
+            const filtro = {
+                skip: (Math.max(paginaActual, 1) - 1) * numeroLineas,
+                top: parseInt(numeroLineas),
+                filter: ablFilter,
+                sort: [orderBy],
+            }
+
+            obtenerRegistros(filtro)
+
             contarRegistros(ablFilter, tabla).then(numeroRegistros => {
+                if (numeroRegistros < numeroLineas) {
+                    setNumeroPaginas(1)
+                } else {
+                    setNumeroPaginas(Math.round(numeroRegistros / numeroLineas))
+                }
                 setNumeroRegistros(numeroRegistros)
-                setNumeroPaginas(
-                    Math.round(
-                        numeroRegistros / parametrosConsulta.lineasPorPagina
-                    )
-                )
             })
-    }, [ablFilter])
+        }
+    }, [ablFilter, paginaActual, numeroLineas, orderBy])
 
     return {
         paginaActual,
@@ -61,12 +67,14 @@ const useNavegacion = ({ tabla, obtenerRegistros }) => {
         numeroRegistros,
         setPaginaActual,
         setAblFilter,
+        setOrderBy,
         handlePrimero,
         handleSiguiente,
         handleAnterior,
         handleUltimo,
         setNumeroPaginas,
         setNumeroRegistros,
+        modificaNumeroLineas,
     }
 }
 

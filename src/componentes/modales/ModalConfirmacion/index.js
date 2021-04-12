@@ -1,7 +1,7 @@
 import React from 'react'
 
 // Componentes
-import { Boton } from '../UI'
+import { Boton } from '../../UI'
 
 import { ModalEstilos } from './styledComponents'
 

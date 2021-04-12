@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react'
 
-// Dependencias
-import { progress } from '@progress/jsdo-core'
-import { obtenerConexion } from '../../services'
-
 // Componentes
-import { Boton, ContenedorModalAyuda, TablaAyuda, WrapperAyuda } from '../UI'
-import Navegacion from '../../componentes/Navegacion'
+import { Boton, ContenedorModalAyuda, TablaAyuda, WrapperAyuda } from '../../UI'
+import Navegacion from '../../Navegacion'
 
 // Hooks
-import useNavegacion from '../../hooks/useNavegacion'
+import useNavegacion from '../../../hooks/useNavegacion'
+import { obtenerRegistrosCalurb } from '../../../services/calurb'
 
 const ModalAyudaCalificacionUrbanistica = ({
     mostrarModal,
@@ -27,23 +24,14 @@ const ModalAyudaCalificacionUrbanistica = ({
     /* -------------------------------------------------------------------- */
     const obtenerRegistros = filtro => {
         mostrarModal &&
-            obtenerConexion().then(() => {
-                const jsdo = new progress.data.JSDO({ name: 'calurb' })
-
-                jsdo.fill(filtro).then(
-                    jsdo => {
-                        const { success, request } = jsdo
-                        if (success) {
-                            const lista = request.response.dsCALURB.ttCALURB
-                            setLista(lista)
-                        }
-                    },
-                    () => {
-                        console.log(
-                            'Error de lectura. No se han podido obtener los registros'
-                        )
-                    }
-                )
+            obtenerRegistrosCalurb(filtro).then(jsdo => {
+                const { success, request } = jsdo
+                if (success) {
+                    const lista = request.response.dsCALURB.ttCALURB
+                    setLista(lista)
+                } else {
+                    console.log(jsdo)
+                }
             })
     }
 

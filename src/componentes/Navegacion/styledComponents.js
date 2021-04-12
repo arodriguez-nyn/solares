@@ -9,9 +9,18 @@ export const NavegacionEstilos = styled.header`
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: 1rem;
 
     span {
         color: var(--font-color);
         font-size: 0.8rem;
+
+        label {
+            margin-left: 2rem;
+        }
+
+        select {
+            margin-left: 1rem;
+        }
     }
 `

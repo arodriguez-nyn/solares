@@ -6,7 +6,6 @@ export const Campo = styled.input`
     padding: 0.15rem 0.55rem;
     border: none;
     border-bottom: 1px solid #d2d6de;
-    border-radius: 2px;
     margin-bottom: 0.8rem;
     line-height: 1.42857143;
     width: ${props => props.width || '100%'};
@@ -26,7 +25,6 @@ export const CampoError = styled.input`
     padding: 0.15rem 0.55rem;
     border: none;
     border-bottom: 1px solid #d2d6de;
-    border-radius: 2px;
     margin-bottom: 0.8rem;
     line-height: 1.42857143;
     width: ${props => props.width || '100%'};
@@ -132,11 +130,8 @@ export const BotonNavegacion = styled.button`
     width: ${props => (props.size ? props.size : '25px')};
     height: ${props => (props.size ? props.size : '25px')};
     border: none;
-    border: 1px solid var(--primary-green);
-    margin-left: 0.25rem;
     background-color: transparent;
     color: var(--primary-green);
-    border-radius: 0.25rem;
     transition: all 0.3s ease;
 
     :hover {
@@ -371,5 +366,46 @@ export const Editor = styled.textarea`
         box-shadow: 0 0 2px #c3c3c3 inset;
         background-color: var(--background-focus);
         color: var(--font-color);
+    }
+`
+
+export const CampoFiltro = styled.input`
+    color: var(--font-color);
+    padding: 0.25rem 0.45rem;
+    border: none;
+    border-bottom: 1px solid #d2d6de;
+    margin-bottom: 0.8rem;
+    line-height: 1.42857143;
+    height: 1.5rem;
+    width: ${props => props.width || '100%'};
+    text-align: ${props => props.alineacion || 'left'};
+
+    :focus {
+        outline: none;
+        border-bottom: 3px solid var(--secondary-blue);
+        box-shadow: 0 0 2px #c3c3c3 inset;
+        background-color: var(--background-focus);
+        color: var(--font-color);
+    }
+`
+export const Selector = styled.select`
+    color: var(--font-color);
+    padding: 0.15rem 0.55rem;
+    border: none;
+    border-bottom: 1px solid #d2d6de;
+    margin-bottom: 0.8rem;
+    line-height: 1.42857143;
+    text-align: ${props => props.alineacion || 'left'};
+    width: ${props => props.width || 'auto'};
+    padding-left: ${props => props.paddingLeft || '0'};
+    font-size: 0.8rem;
+
+    :focus {
+        outline: none;
+        color: var(--font-color);
+    }
+
+    :hover {
+        cursor: pointer;
     }
 `
