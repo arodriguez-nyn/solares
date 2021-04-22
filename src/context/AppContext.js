@@ -15,12 +15,14 @@ export const AppContextProvider = ({ children }) => {
     )
     const [paginaActual, setPaginaActual] = useState(null)
     const [filtroActual, setFiltroActual] = useState('')
-    const [camposFiltro, setCamposFiltro] = useState({
-        FICGEN: 0,
-        DIRECC: '',
-        LOCALI: '',
-        PROSOL: '',
-    })
+    // const [camposFiltro, setCamposFiltro] = useState({
+    //     FICGEN: 0,
+    //     DIRECC: '',
+    //     LOCALI: '',
+    //     PROSOL: '',
+    // })
+    const [ordenacion, setOrdenacion] = useState(null)
+    const [autenticado, setAutenticado] = useState(null)
 
     const guardaRegistroActual = registro => {
         setRegistroActual(registro)
@@ -36,16 +38,29 @@ export const AppContextProvider = ({ children }) => {
 
     const guardaFiltroActual = filtro => {
         setFiltroActual(filtro)
-        //localStorage.setItem('solares-cafiso-filtro', JSON.stringify(filtro))
     }
 
-    const guardaCamposFiltro = campos => {
-        setCamposFiltro(campos)
-        // localStorage.setItem(
-        //     'solares-cafiso-filtro-campos',
-        //     JSON.stringify(campos)
-        // )
+    // const guardaCamposFiltro = campos => {
+    //     setCamposFiltro(campos)
+    // }
+
+    const autenticarUsuario = autenticado => {
+        setAutenticado(autenticado)
+
+        localStorage.setItem('solares-sesion', JSON.stringify(autenticado))
     }
+
+    const guardaOrdenacion = ordenacion => {
+        setOrdenacion(ordenacion)
+
+        localStorage.setItem('solares-ordenacion', JSON.stringify(ordenacion))
+    }
+
+    // const cierraSesion = () => {
+    //     setAutenticado(false)
+
+    //     localStorage.removeItem('solares-sesion')
+    // }
 
     return (
         <AppContext.Provider
@@ -60,7 +75,8 @@ export const AppContextProvider = ({ children }) => {
                 registroDetalleModificado,
                 paginaActual,
                 filtroActual,
-                camposFiltro,
+                autenticado,
+                ordenacion,
                 guardaRegistroActual,
                 setRegistroCreado,
                 setRegistroBorrado,
@@ -71,7 +87,8 @@ export const AppContextProvider = ({ children }) => {
                 setRegistroDetalleModificado,
                 setPaginaActual,
                 guardaFiltroActual,
-                guardaCamposFiltro,
+                autenticarUsuario,
+                guardaOrdenacion,
             }}
         >
             {children}

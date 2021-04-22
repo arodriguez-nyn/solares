@@ -382,14 +382,14 @@ const FormularioCafiso = () => {
     }
 
     /* Leave del campo tipfin: buscamos la descripción del valor introducido */
-    const handleBlurTipfin = (e, setFieldValue) => {
+    const handleBlurTipfin = e => {
         const nuevoValor = parseInt(e.target.value)
 
         leaveTipfin(nuevoValor, setFieldValue)
     }
 
     /* Leave del campo califi: buscamos la descripción del valor introducido */
-    const handleBlurCalurb = (e, setFieldValue) => {
+    const handleBlurCalurb = e => {
         const nuevoValor = parseInt(e.target.value)
 
         leaveCalurb(nuevoValor, setFieldValue)
@@ -618,10 +618,7 @@ const FormularioCafiso = () => {
                                                             (tipfinRef.current = el)
                                                         }
                                                         onBlur={e =>
-                                                            handleBlurTipfin(
-                                                                e,
-                                                                setFieldValue
-                                                            )
+                                                            handleBlurTipfin(e)
                                                         }
                                                     />
                                                 ) : (

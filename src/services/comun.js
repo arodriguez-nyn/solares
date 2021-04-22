@@ -2,27 +2,33 @@ import { progress } from '@progress/jsdo-core'
 
 const serviceURI = 'http://localhost:7020/nynweb'
 const catalogURI = 'http://localhost:7020/nynweb/static/nynwebService.json'
+const authenticationModel = progress.data.Session.AUTH_TYPE_FORM
+const name = 'sesionActualKey'
 
-export const parametrosConsulta = {
-    lineasPorPagina: 10,
-}
+let sesionActual
 
-// const serviceURI = 'http://localhost:7030/nynwebInt'
-// const catalogURI =
-//     'http://localhost:7030/nynwebInt/static/nynwebIntService.json'
-
-export const obtenerConexion = () => {
-    return progress.data.getSession({
-        serviceURI,
-        catalogURI,
-        authenticationModel: progress.data.Session.AUTH_TYPE_FORM, // Seguridad con OERealm
-        username: 'cicle',
-        password: 'cicle_nyn',
-    })
+export const conectar = (username = '', password = '') => {
+    return progress.data
+        .getSession({
+            name,
+            serviceURI,
+            authenticationModel,
+            catalogURI,
+            username,
+            password,
+        })
+        .then(respuesta => {
+            sesionActual = respuesta
+            return respuesta
+        })
+        .catch(error => {
+            console.log('Error al iniciar sesión', error)
+            return error
+        })
 }
 
 export const contarRegistros = (filtro, tabla) => {
-    return obtenerConexion().then(() => {
+    return conectar().then(() => {
         const jsdo = new progress.data.JSDO({ name: tabla })
         //const filter = { filter: 'TIPFIN = 2' }
         const ablFilter = { filter: filtro }
@@ -41,21 +47,6 @@ export const contarRegistros = (filtro, tabla) => {
     })
 }
 
-/*export const obtenerRegistros = ({tabla, dataSet, query}) => {
-    return obtenerConexion()
-    .then(() => {
-        const jsdo = new progress.data.JSDO({name: 'cafiso'});
-        
-        jsdo.fill('TIPFIN = 2')
-        .then(jsdo => {    
-            const { success, request } = jsdo
-            if(success){
-                const lista = request.response.dsCAFISO.ttCAFISO
-                //const lista = `${request.response}.${dataSet}`
-                return lista
-            }
-        }, () => {
-            console.log("Error while reading records.");
-        })
-    })
-}*/
+export const cerrarSesion = () => {
+    return sesionActual.jsdosession.invalidate()
+}

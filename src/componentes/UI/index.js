@@ -28,6 +28,7 @@ export const CampoError = styled.input`
     margin-bottom: 0.8rem;
     line-height: 1.42857143;
     width: ${props => props.width || '100%'};
+    text-align: ${props => props.alineacion || 'left'};
 
     :focus {
         outline: none;
@@ -54,7 +55,7 @@ export const Boton = styled.button`
     background-color: transparent;
     transition: all 0.3s ease;
     border-radius: 4px;
-    padding: 0.25rem 1.2rem;
+    padding: 0.45rem 1.2rem;
     font-size: 14px;
     user-select: none;
     margin-left: 0.5rem;

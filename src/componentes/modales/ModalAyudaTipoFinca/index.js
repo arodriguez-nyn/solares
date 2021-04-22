@@ -29,7 +29,7 @@ const ModalAyudaTipoFinca = ({
             obtenerRegistrosTipfin(filtro).then(jsdo => {
                 const { success, request } = jsdo
                 if (success) {
-                    const lista = request.response.dsTIFIN.ttTIPFIN
+                    const lista = request.response.dsTIPFIN.ttTIPFIN
                     setLista(lista)
                 } else {
                     console.log(jsdo)

@@ -1,5 +1,5 @@
 import { progress } from '@progress/jsdo-core'
-import { obtenerConexion } from './comun'
+import { conectar } from './comun'
 
 export const guardarCafiso = (values, registroActual) => {
     const useSubmit = true
@@ -22,7 +22,7 @@ export const guardarCafiso = (values, registroActual) => {
         edpobr,
     } = values
 
-    return obtenerConexion().then(() => {
+    return conectar().then(() => {
         const jsdo = new progress.data.JSDO({ name: 'cafiso' })
         const dataSet = {
             NUMFIC: numfic,
@@ -89,7 +89,7 @@ export const borrarCafiso = registroActual => {
         edpobr,
     } = registroActual
 
-    return obtenerConexion().then(() => {
+    return conectar().then(() => {
         const jsdo = new progress.data.JSDO({ name: 'cafiso' })
         const dataSet = {
             NUMFIC: numfic,
@@ -123,12 +123,37 @@ export const borrarCafiso = registroActual => {
 }
 
 export const obtenerRegistrosCafiso = filtro => {
-    return obtenerConexion().then(() => {
-        const jsdo = new progress.data.JSDO({ name: 'cafiso' })
+    return conectar().then(respuesta => {
+        const { result } = respuesta
 
-        return jsdo.fill(filtro).then(
-            jsdo => jsdo,
-            error => error
-        )
+        if (result === 1 || result === 3) {
+            const jsdo = new progress.data.JSDO({ name: 'cafiso' })
+
+            return jsdo.fill(filtro).then(
+                jsdo => {
+                    return jsdo
+                },
+                error => {
+                    return error
+                }
+            )
+        } else {
+            console.log('Usuario o contraseña incorrectos.')
+        }
     })
+
+    // return obtenerConexion().then(() => {
+    //     const jsdo = new progress.data.JSDO({ name: 'cafiso' })
+
+    //     return jsdo.fill(filtro).then(
+    //         jsdo => {
+    //             console.log('jsdo', jsdo)
+    //             return jsdo
+    //         },
+    //         error => {
+    //             console.log('error', error)
+    //             return error
+    //         }
+    //     )
+    // })
 }

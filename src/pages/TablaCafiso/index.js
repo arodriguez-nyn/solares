@@ -33,6 +33,8 @@ const TablaCafiso = () => {
     /* -------------------------------------------------------------------- */
     const [lista, setLista] = useState([])
     const {
+        autenticado,
+        ordenacion,
         filtroActual,
         registroCreado,
         registroModificado,
@@ -41,11 +43,12 @@ const TablaCafiso = () => {
         setRegistroCreado,
         setRegistroModificado,
         setRegistroBorrado,
+        guardaOrdenacion,
     } = useContext(AppContext)
     const [mensaje, setMensaje] = useState(null)
     const history = useHistory()
     const [loading, setLoading] = useState(false)
-    const ordenacion = [
+    const listaOrdenacion = [
         'Carpeta',
         'Carpeta Desc',
         'Dirección',
@@ -65,6 +68,8 @@ const TablaCafiso = () => {
     /* ----------------------------- FUNCIONES ---------------------------- */
     /* -------------------------------------------------------------------- */
     const obtenerRegistros = filtro => {
+        if (!autenticado) return
+
         setLoading(true)
         obtenerRegistrosCafiso(filtro).then(jsdo => {
             setLoading(false)
@@ -80,6 +85,28 @@ const TablaCafiso = () => {
                 console.log(jsdo)
             }
         })
+
+        // if (sesion) {
+        //     obtenerRegistrosCafiso(sesion, filtro).then(jsdo => {
+        //         setLoading(false)
+        //         const { success, request } = jsdo
+        //         if (success) {
+        //             const lista = request.response.dsCAFISO.ttCAFISO
+        //             if (lista) {
+        //                 setLista(lista)
+        //             } else {
+        //                 setLista(null)
+        //             }
+        //         } else {
+        //             console.log(jsdo)
+        //         }
+        //     })
+        // } else {
+        //     setMensaje({
+        //         texto: 'Se ha desconectado la sesión. Vuelve a iniciarla.',
+        //         tipo: 'error',
+        //     })
+        // }
     }
 
     const handleClick = registro => {
@@ -127,38 +154,63 @@ const TablaCafiso = () => {
         let campoOrdenacion = ''
         switch (campo) {
             case 'Carpeta':
-                campoOrdenacion = 'FICGEN'
+                campoOrdenacion = { nombre: 'FICGEN', descripcion: 'Carpeta' }
                 break
             case 'Carpeta Desc':
-                campoOrdenacion = 'FICGEN DESC'
+                campoOrdenacion = {
+                    nombre: 'FICGEN DESC',
+                    descripcion: 'Carpeta Desc',
+                }
                 break
             case 'Dirección':
-                campoOrdenacion = 'DIRECC'
+                campoOrdenacion = { nombre: 'DIRECC', descripcion: 'Dirección' }
                 break
             case 'Dirección Desc':
-                campoOrdenacion = 'DIRECC DESC'
+                campoOrdenacion = {
+                    nombre: 'DIRECC DESC',
+                    descripcion: 'Dirección Desc',
+                }
                 break
             case 'Población':
-                campoOrdenacion = 'LOCALI'
+                campoOrdenacion = {
+                    nombre: 'LOCALI',
+                    descripcion: 'Población',
+                }
                 break
             case 'Población Desc':
-                campoOrdenacion = 'LOCALI DESC'
+                campoOrdenacion = {
+                    nombre: 'LOCALI DESC',
+                    descripcion: 'Población Desc',
+                }
                 break
             case 'Tipo Inmueble':
-                campoOrdenacion = 'TIPFIN_DESCRI'
+                campoOrdenacion = {
+                    nombre: 'TIPFIN_DESCRI',
+                    descripcion: 'Tipo Inmueble',
+                }
                 break
             case 'Tipo Inmueble Desc':
-                campoOrdenacion = 'TIPFIN_DESCRI DESC'
+                campoOrdenacion = {
+                    nombre: 'TIPFIN_DESCRI DESC',
+                    descripcion: 'Tipo Inmueble Desc',
+                }
                 break
             case 'Cal. Urbanística':
-                campoOrdenacion = 'CALURB_CODIGO'
+                campoOrdenacion = {
+                    nombre: 'CALURB_CODIGO',
+                    descripcion: 'Cal. Urbanística',
+                }
                 break
             case 'Cal. Urbanística Desc':
-                campoOrdenacion = 'CALURB_CODIGO DESC'
+                campoOrdenacion = {
+                    nombre: 'CALURB_CODIGO DESC',
+                    descripcion: 'Cal. Urbanística Desc',
+                }
                 break
         }
 
         setOrderBy(campoOrdenacion)
+        guardaOrdenacion(campoOrdenacion)
     }
 
     // Hook para la paginación
@@ -183,27 +235,32 @@ const TablaCafiso = () => {
     /* ---------------------------- USE EFFECTS --------------------------- */
     /* -------------------------------------------------------------------- */
     useEffect(() => {
-        // const filtroString = localStorage.getItem('solares-cafiso-filtro')
-        // if (filtroString) {
-        //     const filtro = JSON.parse(filtroString)
-        //     setAblFilter(filtro)
-        //     setPaginaActual(1)
-        // }
+        if (!autenticado) return
 
+        setOrderBy(ordenacion.nombre)
         setAblFilter(filtroActual)
         setPaginaActual(1)
 
         // Mensajes por acciones en otras pantallas
         if (registroCreado) {
-            setMensaje('Registro creado correctamente.')
+            setMensaje({
+                texto: 'Registro creado correctamente.',
+                tipo: 'exito',
+            })
         }
         if (registroModificado) {
-            setMensaje('Registro modificado correctamente.')
+            setMensaje({
+                texto: 'Registro modificado correctamente.',
+                tipo: 'exito',
+            })
         }
         if (registroBorrado) {
-            setMensaje('Registro borrado correctamente.')
+            setMensaje({
+                texto: 'Registro borrado correctamente.',
+                tipo: 'exito',
+            })
         }
-    }, [filtroActual])
+    }, [autenticado, filtroActual, ordenacion])
 
     /* -------------------------------------------------------------------- */
     /* ---------------------------- RENDERIZADO --------------------------- */
@@ -217,7 +274,8 @@ const TablaCafiso = () => {
                     <FiltroTablaCafiso obtenerRegistros={obtenerRegistros} />
                     {lista && (
                         <Navegacion
-                            ordenacion={ordenacion}
+                            campoOrdenacion={ordenacion}
+                            ordenacion={listaOrdenacion}
                             paginaActual={paginaActual}
                             numeroPaginas={numeroPaginas}
                             handleAnterior={handleAnterior}
@@ -229,7 +287,9 @@ const TablaCafiso = () => {
                         />
                     )}
                     <h2>Listado de Solares</h2>
-                    {mensaje && <Alerta mensaje={mensaje} tipo='exito' />}
+                    {mensaje && (
+                        <Alerta mensaje={mensaje.texto} tipo={mensaje.tipo} />
+                    )}
                     <TablaEstilos>
                         <thead>
                             <tr>

@@ -6,6 +6,7 @@ import TablaCafiso from '../pages/TablaCafiso'
 import Layout from '../componentes/Layout'
 import TablaDefiso from '../pages/TablaDefiso'
 import FormularioDefiso from '../pages/FormularioDefiso'
+import Login from '../pages/Login'
 
 // Dependencias
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
@@ -18,8 +19,9 @@ const MainApp = () => {
         <AppContextProvider>
             <Router>
                 <Switch>
+                    <Route exact path='/' component={Login} />
+                    <Route exact path='/login' component={Login} />
                     <Layout>
-                        <Route exact path='/' component={TablaCafiso} />
                         <Route
                             exact
                             path='/formulario'

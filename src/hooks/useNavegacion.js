@@ -9,7 +9,7 @@ const useNavegacion = ({ tabla, obtenerRegistros }) => {
     const [numeroPaginas, setNumeroPaginas] = useState(0)
     const [numeroRegistros, setNumeroRegistros] = useState(0)
     const [ablFilter, setAblFilter] = useState(null)
-    const [orderBy, setOrderBy] = useState('NUMFIC')
+    const [orderBy, setOrderBy] = useState('')
     const [numeroLineas, setNumeroLineas] = useState(10)
 
     const handleSiguiente = () => {

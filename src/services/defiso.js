@@ -1,5 +1,5 @@
 import { progress } from '@progress/jsdo-core'
-import { obtenerConexion } from './comun'
+import { conectar } from './comun'
 
 export const guardarDefiso = (values, registroActual, registroCafiso) => {
     const useSubmit = true
@@ -24,7 +24,7 @@ export const guardarDefiso = (values, registroActual, registroCafiso) => {
         observ,
     } = values
 
-    return obtenerConexion().then(() => {
+    return conectar().then(() => {
         const jsdo = new progress.data.JSDO({ name: 'defiso' })
         const dataSet = {
             NUMFIC: numfic,
@@ -98,7 +98,7 @@ export const borrarDefiso = (registroCafiso, registroActual) => {
         observ,
     } = registroActual
 
-    return obtenerConexion().then(() => {
+    return conectar().then(() => {
         const jsdo = new progress.data.JSDO({ name: 'defiso' })
         const dataSet = {
             NUMFIC: numfic,
@@ -137,7 +137,7 @@ export const borrarDefiso = (registroCafiso, registroActual) => {
 }
 
 export const obtenerRegistrosDefiso = filtro => {
-    return obtenerConexion().then(() => {
+    return conectar().then(() => {
         const jsdo = new progress.data.JSDO({ name: 'defiso' })
 
         return jsdo.fill(filtro).then(

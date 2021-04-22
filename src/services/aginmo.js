@@ -1,8 +1,8 @@
 import { progress } from '@progress/jsdo-core'
-import { obtenerConexion } from './comun'
+import { conectar } from './comun'
 
 export const obtenerRegistrosAginmo = filtro => {
-    return obtenerConexion().then(() => {
+    return conectar().then(() => {
         const jsdo = new progress.data.JSDO({ name: 'aginmo' })
 
         return jsdo.fill(filtro).then(

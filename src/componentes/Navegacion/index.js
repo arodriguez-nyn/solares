@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 // Componentes
 import { NavegacionEstilos } from './styledComponents'
 import { Selector, BotonNavegacion } from '../../componentes/UI'
 
 const Navegacion = ({
+    campoOrdenacion,
     buttonSize,
     ordenacion,
     paginaActual,
@@ -28,6 +29,16 @@ const Navegacion = ({
     }
 
     /* -------------------------------------------------------------------- */
+    /* ---------------------------- USE EFFECTS --------------------------- */
+    /* -------------------------------------------------------------------- */
+    // useEffect(() => {
+    //     if (!campoOrdenacion) return
+
+    //     setOrdenacionCampo(campoOrdenacion)
+    //     modificaOrdenacion(campoOrdenacion)
+    // }, [])
+
+    /* -------------------------------------------------------------------- */
     /* ---------------------------- RENDERIZADO --------------------------- */
     /* -------------------------------------------------------------------- */
     return (
@@ -45,7 +56,13 @@ const Navegacion = ({
             {ordenacion && ordenacion.length > 0 && (
                 <span>
                     <label htmlFor='cafiso-ordenar'>Ordenar por:</label>
-                    <Selector id='cafiso-ordenar' onChange={handleOrdenacion}>
+                    <Selector
+                        id='cafiso-ordenar'
+                        onChange={handleOrdenacion}
+                        value={
+                            campoOrdenacion ? campoOrdenacion.descripcion : ''
+                        }
+                    >
                         {ordenacion.map(campo => (
                             <option key={campo}>{campo}</option>
                         ))}
