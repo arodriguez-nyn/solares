@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 
 // Componentes
 import { CabeceraEstilos, WrapperEstilos } from './styledComponents'
@@ -16,22 +16,27 @@ const Cabecera = () => {
     /* ------------------------------------------------------------------- */
     /* -------------------- CONSTANTES Y DECLARACIONES ------------------- */
     /* ------------------------------------------------------------------- */
-    const { cierraSesion } = useContext(AppContext)
     const history = useHistory()
-    /*const { usuarioAutenticado } = useContext(LoginContext)
-
-    if (!usuarioAutenticado) return*/
+    const { usuario, guardaUsuario } = useContext(AppContext)
 
     /* -------------------------------------------------------------------- */
     /* ----------------------------- FUNCIONES ---------------------------- */
     /* -------------------------------------------------------------------- */
     const handleClick = () => {
-        cerrarSesion().then(respuesta => {
-            console.log('respuesta logout', respuesta)
-            cierraSesion()
-            history.push('/')
+        cerrarSesion().then(() => {
+            localStorage.removeItem('solares-usuario')
+            guardaUsuario(null)
         })
     }
+
+    /* -------------------------------------------------------------------- */
+    /* ---------------------------- USE EFFECTS --------------------------- */
+    /* -------------------------------------------------------------------- */
+    useEffect(() => {
+        if (!usuario) {
+            history.push('/')
+        }
+    }, [usuario])
 
     return (
         <WrapperEstilos>
@@ -40,10 +45,16 @@ const Cabecera = () => {
                     src='static/img/logo-horiz-nn-rgb-amarillo.svg'
                     alt='Logo'
                 />
-                <div>
-                    {/* <i className="fas fa-user"></i> {usuarioAutenticado.CONCEP} */}
-                    <span onClick={handleClick}>Cerrar Sesión</span>
-                </div>
+                {usuario && (
+                    <div onClick={handleClick}>
+                        <span title='Cerrar la sesión'>
+                            <i className='fas fa-user'></i> {usuario.nombre}
+                        </span>
+                        {/* <span>
+                            <i className='fas fa-sign-out-alt'></i>
+                        </span> */}
+                    </div>
+                )}
             </CabeceraEstilos>
         </WrapperEstilos>
     )

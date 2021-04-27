@@ -22,6 +22,7 @@ import AppContext from '../../context/AppContext'
 
 // Servicios
 import { conectar } from '../../services/comun'
+import { obtenerRegistrosUsuari } from '../../services/usuari'
 
 const Login = () => {
     /* ------------------------------------------------------------------- */
@@ -57,7 +58,7 @@ const Login = () => {
     const [errorNombre, setErrorNombre] = useState(false)
     const [errorPassword, setErrorPassword] = useState(false)
     const history = useHistory()
-    const { autenticarUsuario } = useContext(AppContext)
+    const { guardaUsuario } = useContext(AppContext)
 
     // Referencias para acceder al DOM de algunos campos
     const nombreRef = useRef()
@@ -88,37 +89,45 @@ const Login = () => {
             return
         }
 
-        conectar(nombre, password).then(respuesta => {
-            const { result } = respuesta
-            // console.log('jsdosession en pantalla login', jsdosession)
+        conectar(nombre, password).then(
+            respuesta => {
+                const { result } = respuesta
+                console.log('respuesta Login', respuesta)
 
-            if (result === 1 || result === 3) {
-                autenticarUsuario(true)
-                history.push('/lista')
-            } else {
-                autenticarUsuario(null)
-                setMensaje('Usuario o contraseña incorrectos.')
+                if (result === 1 || result === 3) {
+                    return obtenerRegistrosUsuari(`USUARI = '${nombre}'`).then(
+                        respuestaUsuario => {
+                            if (respuestaUsuario) {
+                                const usuario = {
+                                    codigo:
+                                        respuestaUsuario.request.response
+                                            .dsUSUARI.ttUSUARI[0].USUARI,
+                                    nombre:
+                                        respuestaUsuario.request.response
+                                            .dsUSUARI.ttUSUARI[0].CONCEP,
+                                }
+                                guardaUsuario(usuario)
+                                history.push('/lista')
+                            }
+                        },
+                        error => {
+                            console.log('Error al obtener el usuario', error)
+                        }
+                    )
+                } else {
+                    guardaUsuario(null)
+                    setMensaje('Usuario o contraseña incorrectos.')
+                }
+            },
+            error => {
+                console.log('error login', error)
             }
-        })
-
-        // obtenerConexion().then(session => console.log(object))
+        )
     }
 
     /* -------------------------------------------------------------------- */
     /* ---------------------------- USE EFFECTS --------------------------- */
     /* -------------------------------------------------------------------- */
-    // useEffect(() => {
-    //     if (!sesion) return
-
-    //     // console.log('Sesión en useEffect Login', sesion)
-    //     // const sesionLocalStorage = JSON.parse(
-    //     //     localStorage.getItem('solares-sesion')
-    //     // )
-    //     // console.log(sesionLocalStorage.connected)
-
-    //     //history.push('/lista')
-    // }, [sesion])
-
     useEffect(() => {
         nombreRef.current.select()
     }, [errorNombre])
@@ -126,6 +135,13 @@ const Login = () => {
     useEffect(() => {
         passwordRef.current.select()
     }, [errorPassword])
+
+    useEffect(() => {
+        const usuarioString = localStorage.getItem('solares-usuario')
+        const usuario = JSON.parse(usuarioString)
+
+        if (usuario) history.push('/lista')
+    }, [])
 
     /* ------------------------------------------------------------------- */
     /* --------------------------- RENDERIZADO --------------------------- */
@@ -163,6 +179,7 @@ const Login = () => {
                                                 id='nombre'
                                                 name='nombre'
                                                 type='text'
+                                                autoFocus
                                                 placeholder='Introduce el código de usuario'
                                                 value={values.nombre}
                                                 ref={nombreRef}

@@ -41,6 +41,7 @@ const TablaDefiso = () => {
         setRegistroDetalleCreado,
         setRegistroDetalleModificado,
         setRegistroDetalleBorrado,
+        setPaginaDetalle,
     } = useContext(AppContext)
     const [mensaje, setMensaje] = useState(null)
     const [loading, setLoading] = useState(false)
@@ -87,6 +88,7 @@ const TablaDefiso = () => {
             const { success, request } = jsdo
             if (success) {
                 const lista = request.response.dsDEFISO.ttDEFISO
+                console.log(lista)
                 if (lista) {
                     setLista(lista)
                 } else {
@@ -269,6 +271,10 @@ const TablaDefiso = () => {
         }
     }, [registroActual, registroDetalleActual])
 
+    useEffect(() => {
+        setPaginaDetalle(paginaActual)
+    }, [paginaActual])
+
     /* -------------------------------------------------------------------- */
     /* ---------------------------- RENDERIZADO --------------------------- */
     /* -------------------------------------------------------------------- */
@@ -360,7 +366,9 @@ const TablaDefiso = () => {
                     </TablaEstilos>
                     <footer>
                         {numeroRegistros !== 0 && (
-                            <span>{`${numeroRegistros} registros`}</span>
+                            <span>{`${numeroRegistros} ${
+                                numeroRegistros > 1 ? 'registros' : 'registro'
+                            }`}</span>
                         )}
                         <div>
                             {/* <Boton

@@ -123,24 +123,29 @@ export const borrarCafiso = registroActual => {
 }
 
 export const obtenerRegistrosCafiso = filtro => {
-    return conectar().then(respuesta => {
-        const { result } = respuesta
+    return conectar().then(
+        respuesta => {
+            const { result } = respuesta
 
-        if (result === 1 || result === 3) {
-            const jsdo = new progress.data.JSDO({ name: 'cafiso' })
+            if (result === 1 || result === 3) {
+                const jsdo = new progress.data.JSDO({ name: 'cafiso' })
 
-            return jsdo.fill(filtro).then(
-                jsdo => {
-                    return jsdo
-                },
-                error => {
-                    return error
-                }
-            )
-        } else {
-            console.log('Usuario o contraseña incorrectos.')
+                return jsdo.fill(filtro).then(
+                    jsdo => {
+                        return jsdo
+                    },
+                    error => {
+                        return error
+                    }
+                )
+            } else {
+                return result
+            }
+        },
+        error => {
+            console.log('error cafiso', error)
         }
-    })
+    )
 
     // return obtenerConexion().then(() => {
     //     const jsdo = new progress.data.JSDO({ name: 'cafiso' })

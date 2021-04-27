@@ -33,9 +33,10 @@ const TablaCafiso = () => {
     /* -------------------------------------------------------------------- */
     const [lista, setLista] = useState([])
     const {
-        autenticado,
+        usuario,
         ordenacion,
         filtroActual,
+        paginaCabecera,
         registroCreado,
         registroModificado,
         registroBorrado,
@@ -44,6 +45,8 @@ const TablaCafiso = () => {
         setRegistroModificado,
         setRegistroBorrado,
         guardaOrdenacion,
+        guardaUsuario,
+        setPaginaCabecera,
     } = useContext(AppContext)
     const [mensaje, setMensaje] = useState(null)
     const history = useHistory()
@@ -68,23 +71,34 @@ const TablaCafiso = () => {
     /* ----------------------------- FUNCIONES ---------------------------- */
     /* -------------------------------------------------------------------- */
     const obtenerRegistros = filtro => {
-        if (!autenticado) return
+        if (!usuario) return
 
         setLoading(true)
-        obtenerRegistrosCafiso(filtro).then(jsdo => {
-            setLoading(false)
-            const { success, request } = jsdo
-            if (success) {
-                const lista = request.response.dsCAFISO.ttCAFISO
-                if (lista) {
-                    setLista(lista)
-                } else {
-                    setLista(null)
+        obtenerRegistrosCafiso(filtro).then(
+            jsdo => {
+                setLoading(false)
+                if (!jsdo) {
+                    // Sesión caducada
+                    localStorage.removeItem('solares-usuario')
+                    guardaUsuario(null)
+                    history.push('/')
+                    return
                 }
-            } else {
-                console.log(jsdo)
-            }
-        })
+
+                const { success, request } = jsdo
+                if (success) {
+                    const lista = request.response.dsCAFISO.ttCAFISO
+                    if (lista) {
+                        setLista(lista)
+                    } else {
+                        setLista(null)
+                    }
+                } else {
+                    console.log('jsdo', jsdo)
+                }
+            },
+            error => console.log('error TablaCafiso', error)
+        )
 
         // if (sesion) {
         //     obtenerRegistrosCafiso(sesion, filtro).then(jsdo => {
@@ -235,11 +249,11 @@ const TablaCafiso = () => {
     /* ---------------------------- USE EFFECTS --------------------------- */
     /* -------------------------------------------------------------------- */
     useEffect(() => {
-        if (!autenticado) return
+        if (!usuario) return
 
-        setOrderBy(ordenacion.nombre)
+        if (ordenacion && ordenacion.nombre) setOrderBy(ordenacion.nombre)
         setAblFilter(filtroActual)
-        setPaginaActual(1)
+        setPaginaActual(paginaCabecera ? paginaCabecera : 1)
 
         // Mensajes por acciones en otras pantallas
         if (registroCreado) {
@@ -260,7 +274,12 @@ const TablaCafiso = () => {
                 tipo: 'exito',
             })
         }
-    }, [autenticado, filtroActual, ordenacion])
+    }, [usuario, filtroActual, ordenacion])
+
+    useEffect(() => {
+        //setPagina(paginaActual)
+        setPaginaCabecera(paginaActual)
+    }, [paginaActual])
 
     /* -------------------------------------------------------------------- */
     /* ---------------------------- RENDERIZADO --------------------------- */
@@ -325,7 +344,9 @@ const TablaCafiso = () => {
                     </TablaEstilos>
                     <footer>
                         {numeroRegistros !== 0 && (
-                            <span>{`${numeroRegistros} registros`}</span>
+                            <span>{`${numeroRegistros} ${
+                                numeroRegistros > 0 ? 'registros' : 'registro'
+                            }`}</span>
                         )}
                         <Boton
                             width='120px'

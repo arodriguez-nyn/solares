@@ -11,21 +11,3 @@ export const obtenerRegistrosUsuari = filtro => {
         )
     })
 }
-
-// export const compruebaUsuario = (usuario, password) => {
-//     return conectar().then(() => {
-//         const jsdo = new progress.data.JSDO({ name: 'usuari' })
-
-//         return jsdo.invoke('checkusuario', usuario, password).then(
-//             jsdo => {
-//                 if (jsdo.success) {
-//                     //const numeroRegistros = jsdo.request.response.numRecs
-//                     return jsdo
-//                 }
-//             },
-//             error => {
-//                 console.log('error', error)
-//             }
-//         )
-//     })
-// }

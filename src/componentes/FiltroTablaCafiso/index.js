@@ -18,7 +18,7 @@ const FiltroTablaCafiso = ({ obtenerRegistros }) => {
     /* --------------------- CONSTANTES Y DECLARACIONES ------------------- */
     /* -------------------------------------------------------------------- */
     const [filtroExpandido, setFiltroExpandido] = useState(false)
-    const { guardaFiltroActual, camposFiltro, guardaCamposFiltro } = useContext(
+    const { guardaFiltroActual, camposFiltro, setCamposFiltro } = useContext(
         AppContext
     )
     const [inputFiltro, setInputFiltro] = useState(
@@ -98,7 +98,7 @@ const FiltroTablaCafiso = ({ obtenerRegistros }) => {
         }
 
         // Guardamos en el contexto para recuperarlo al reentrar en la pantalla
-        guardaCamposFiltro({
+        setCamposFiltro({
             FICGEN: inputFiltro.carpeta,
             DIRECC: inputFiltro.direccion,
             LOCALI: inputFiltro.poblacion,

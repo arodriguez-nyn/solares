@@ -14,15 +14,17 @@ export const AppContextProvider = ({ children }) => {
         false
     )
     const [paginaActual, setPaginaActual] = useState(null)
+    const [paginaCabecera, setPaginaCabecera] = useState(null)
+    const [paginaDetalle, setPaginaDetalle] = useState(null)
     const [filtroActual, setFiltroActual] = useState('')
-    // const [camposFiltro, setCamposFiltro] = useState({
-    //     FICGEN: 0,
-    //     DIRECC: '',
-    //     LOCALI: '',
-    //     PROSOL: '',
-    // })
+    const [usuario, setUsuario] = useState(null)
+    const [camposFiltro, setCamposFiltro] = useState({
+        FICGEN: 0,
+        DIRECC: '',
+        LOCALI: '',
+        PROSOL: '',
+    })
     const [ordenacion, setOrdenacion] = useState(null)
-    const [autenticado, setAutenticado] = useState(null)
 
     const guardaRegistroActual = registro => {
         setRegistroActual(registro)
@@ -40,21 +42,36 @@ export const AppContextProvider = ({ children }) => {
         setFiltroActual(filtro)
     }
 
+    const guardaUsuario = usuario => {
+        setUsuario(usuario)
+        if (usuario) {
+            localStorage.setItem('solares-usuario', JSON.stringify(usuario))
+        } else {
+            localStorage.removeItem('solares-usuario')
+        }
+    }
+
     // const guardaCamposFiltro = campos => {
     //     setCamposFiltro(campos)
     // }
 
-    const autenticarUsuario = autenticado => {
-        setAutenticado(autenticado)
+    // const autenticarUsuario = autenticado => {
+    //     setAutenticado(autenticado)
 
-        localStorage.setItem('solares-sesion', JSON.stringify(autenticado))
-    }
+    //     localStorage.setItem('solares-sesion', JSON.stringify(autenticado))
+    // }
 
     const guardaOrdenacion = ordenacion => {
         setOrdenacion(ordenacion)
 
         localStorage.setItem('solares-ordenacion', JSON.stringify(ordenacion))
     }
+
+    // const guardaNombreUsuario = nombre => {
+    //     setNombreUsuario(nombre)
+
+    //     localStorage.setItem('solares-usuario', JSON.stringify(nombre))
+    // }
 
     // const cierraSesion = () => {
     //     setAutenticado(false)
@@ -75,8 +92,11 @@ export const AppContextProvider = ({ children }) => {
                 registroDetalleModificado,
                 paginaActual,
                 filtroActual,
-                autenticado,
                 ordenacion,
+                usuario,
+                paginaCabecera,
+                paginaDetalle,
+                camposFiltro,
                 guardaRegistroActual,
                 setRegistroCreado,
                 setRegistroBorrado,
@@ -87,8 +107,11 @@ export const AppContextProvider = ({ children }) => {
                 setRegistroDetalleModificado,
                 setPaginaActual,
                 guardaFiltroActual,
-                autenticarUsuario,
                 guardaOrdenacion,
+                guardaUsuario,
+                setPaginaCabecera,
+                setPaginaDetalle,
+                setCamposFiltro,
             }}
         >
             {children}

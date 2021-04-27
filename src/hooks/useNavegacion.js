@@ -53,8 +53,12 @@ const useNavegacion = ({ tabla, obtenerRegistros }) => {
             contarRegistros(ablFilter, tabla).then(numeroRegistros => {
                 if (numeroRegistros < numeroLineas) {
                     setNumeroPaginas(1)
-                } else {
+                } else if (numeroRegistros % numeroLineas === 0) {
                     setNumeroPaginas(Math.round(numeroRegistros / numeroLineas))
+                } else {
+                    setNumeroPaginas(
+                        Math.round(numeroRegistros / numeroLineas) + 1
+                    )
                 }
                 setNumeroRegistros(numeroRegistros)
             })

@@ -11,16 +11,13 @@ import { HistoricoEstilos } from './styledComponents'
 // Contexto
 import AppContext from '../../context/AppContext'
 
-// Servicios
-import { conectar } from '../../services/comun'
-
 const Container = ({ children }) => {
     const {
-        autenticado,
+        usuario,
         guardaRegistroActual,
         guardaRegistroDetalleActual,
         guardaOrdenacion,
-        autenticarUsuario,
+        guardaUsuario,
     } = useContext(AppContext)
 
     /* ------------------------------------------------------------------- */
@@ -96,46 +93,22 @@ const Container = ({ children }) => {
         const registroDetalle = JSON.parse(registroDetalleString)
         guardaRegistroDetalleActual(registroDetalle)
 
-        const autenticacionString = localStorage.getItem('solares-sesion')
-        const autenticacion = JSON.parse(autenticacionString)
-        autenticarUsuario(autenticacion)
+        // const autenticacionString = localStorage.getItem('solares-sesion')
+        // const autenticacion = JSON.parse(autenticacionString)
+        // autenticarUsuario(autenticacion)
 
         const ordenacionString = localStorage.getItem('solares-ordenacion')
         const ordenacion = JSON.parse(ordenacionString)
         guardaOrdenacion(ordenacion)
 
-        console.log('ordenacion layout', ordenacion)
-
-        // if (autenticacion !== null) {
-        //     conectar().then(
-        //         respuesta => {
-        //             console.log('respuesta autenticacion layout', respuesta)
-        //             const { result } = respuesta
-
-        //             if (result === 1 || result === 3) {
-        //                 autenticarUsuario(true)
-        //                 //history.push('/lista')
-        //             } else {
-        //                 autenticarUsuario(false)
-        //                 setMensaje('Usuario o contraseña incorrectos.')
-        //             }
-        //         },
-        //         error => console.log(error)
-        //     )
-        // } else {
-        //     autenticarUsuario(false)
-        // }
-
-        // const camposFiltroString = localStorage.getItem(
-        //     'solares-cafiso-filtro-campos'
-        // )
-        // const camposFiltro = JSON.parse(camposFiltroString)
-        // guardaCamposFiltro(camposFiltro)
-
-        // const filtroString = localStorage.getItem('solares-cafiso-filtro')
-        // const filtro = JSON.parse(filtroString)
-        // guardaFiltroActual(filtro)
+        const usuarioString = localStorage.getItem('solares-usuario')
+        const usuario = JSON.parse(usuarioString)
+        guardaUsuario(usuario)
     }, [])
+
+    useEffect(() => {
+        if (usuario) history.push('/lista')
+    }, [usuario])
 
     /* -------------------------------------------------------------------- */
     /* ---------------------------- RENDERIZADO --------------------------- */

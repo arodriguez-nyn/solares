@@ -22,8 +22,8 @@ export const conectar = (username = '', password = '') => {
             return respuesta
         })
         .catch(error => {
-            console.log('Error al iniciar sesión', error)
-            return error
+            console.log(error)
+            return 'Error al iniciar sesión on sesión expirada'
         })
 }
 
@@ -41,12 +41,17 @@ export const contarRegistros = (filtro, tabla) => {
                 }
             },
             error => {
-                console.log(error)
+                return error
             }
         )
     })
 }
 
 export const cerrarSesion = () => {
+    // return conectar().then(sesion => {
+    //     console.log(sesion)
+    //     return sesion.jsdosession.invalidate()
+    // })
+
     return sesionActual.jsdosession.invalidate()
 }
