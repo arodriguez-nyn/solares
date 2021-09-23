@@ -29,40 +29,6 @@ const useLeaveAginmo = () => {
                     console.log(jsdo)
                 }
             })
-        // obtenerConexion().then(
-        //     () => {
-        //         const jsdo = new progress.data.JSDO({ name: 'aginmo' })
-        //         const filtro = `CODAGE = ${nuevoValor}`
-
-        //         jsdo.fill(filtro).then(
-        //             jsdo => {
-        //                 const { success, request } = jsdo
-
-        //                 console.log(jsdo)
-
-        //                 if (success) {
-        //                     const ttAginmo = request.response.dsAGINMO.ttAGINMO
-
-        //                     if (ttAginmo) {
-        //                         const registro = ttAginmo[0] // Sólo habrá un registro
-        //                         setFieldValue('aginmoNombre', registro.NOMBRE)
-        //                         setAginmoActual(registro.CODAGE)
-        //                     } else {
-        //                         setFieldValue('aginmoNombre', '')
-        //                     }
-        //                 }
-        //             },
-        //             () => {
-        //                 console.log(
-        //                     'Error de lectura. No se han podido obtener los registros'
-        //                 )
-        //             }
-        //         )
-        //     },
-        //     error => {
-        //         console.log(error)
-        //     }
-        // )
     }
 
     return { setAginmoActual, leaveAginmo }

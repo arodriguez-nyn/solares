@@ -1,0 +1,20 @@
+.navegacion {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.navegacion__bloque {
+    color: var(--font-color);
+    font-size: 0.8rem;
+}
+
+.bloque__label {
+    margin-left: 2rem;
+}
+
+.bloque__select {
+    margin-left: 1rem;
+}

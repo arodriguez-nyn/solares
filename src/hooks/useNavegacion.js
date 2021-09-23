@@ -1,10 +1,10 @@
 import { useState, useEffect, useContext } from 'react'
 
-import AppContext from '../context/AppContext'
+import AppContext from 'context/AppContext'
 
-import { contarRegistros } from '../services/comun'
+import { contarRegistros } from 'services/comun'
 
-const useNavegacion = ({ tabla, obtenerRegistros }) => {
+const useNavegacion = ({ tabla, obtenerRegistros, limpiaAlertas }) => {
     const { paginaActual, setPaginaActual } = useContext(AppContext)
     const [numeroPaginas, setNumeroPaginas] = useState(0)
     const [numeroRegistros, setNumeroRegistros] = useState(0)
@@ -13,24 +13,29 @@ const useNavegacion = ({ tabla, obtenerRegistros }) => {
     const [numeroLineas, setNumeroLineas] = useState(10)
 
     const handleSiguiente = () => {
+        console.log(paginaActual)
         const pagina =
             paginaActual < numeroPaginas ? paginaActual + 1 : numeroPaginas
 
         setPaginaActual(pagina)
+        limpiaAlertas()
     }
 
     const handleAnterior = () => {
         const pagina = paginaActual > 1 ? paginaActual - 1 : paginaActual
 
         setPaginaActual(pagina)
+        limpiaAlertas()
     }
 
     const handlePrimero = () => {
         setPaginaActual(1)
+        limpiaAlertas()
     }
 
     const handleUltimo = () => {
         setPaginaActual(numeroPaginas)
+        limpiaAlertas()
     }
 
     const modificaNumeroLineas = lineas => {
@@ -50,18 +55,23 @@ const useNavegacion = ({ tabla, obtenerRegistros }) => {
 
             obtenerRegistros(filtro)
 
-            contarRegistros(ablFilter, tabla).then(numeroRegistros => {
-                if (numeroRegistros < numeroLineas) {
-                    setNumeroPaginas(1)
-                } else if (numeroRegistros % numeroLineas === 0) {
-                    setNumeroPaginas(Math.round(numeroRegistros / numeroLineas))
-                } else {
-                    setNumeroPaginas(
-                        Math.round(numeroRegistros / numeroLineas) + 1
-                    )
-                }
-                setNumeroRegistros(numeroRegistros)
-            })
+            contarRegistros(ablFilter, tabla).then(
+                numeroRegistros => {
+                    if (numeroRegistros < numeroLineas) {
+                        setNumeroPaginas(1)
+                    } else if (numeroRegistros % numeroLineas === 0) {
+                        setNumeroPaginas(
+                            Math.round(numeroRegistros / numeroLineas)
+                        )
+                    } else {
+                        setNumeroPaginas(
+                            Math.trunc(numeroRegistros / numeroLineas) + 1
+                        )
+                    }
+                    setNumeroRegistros(numeroRegistros)
+                },
+                error => console.log(error)
+            )
         }
     }, [ablFilter, paginaActual, numeroLineas, orderBy])
 

@@ -37,7 +37,7 @@ export const CajaLogin = styled.div`
     }
 `
 
-export const CampoAgrupadoOld = styled.div`
+export const CampoAgrupado = styled.div`
     position: relative;
 
     svg {

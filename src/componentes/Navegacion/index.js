@@ -4,6 +4,9 @@ import React, { useEffect, useState } from 'react'
 import { NavegacionEstilos } from './styledComponents'
 import { Selector, BotonNavegacion } from '../../componentes/UI'
 
+// Estilos CSS
+import './styles.css'
+
 const Navegacion = ({
     campoOrdenacion,
     buttonSize,
@@ -16,6 +19,7 @@ const Navegacion = ({
     handleUltimo,
     modificaNumeroLineas,
     modificaOrdenacion,
+    mostrarNumeroLineas = true,
 }) => {
     /* -------------------------------------------------------------------- */
     /* ----------------------------- FUNCIONES ---------------------------- */
@@ -29,28 +33,40 @@ const Navegacion = ({
     }
 
     /* -------------------------------------------------------------------- */
-    /* ---------------------------- USE EFFECTS --------------------------- */
-    /* -------------------------------------------------------------------- */
-
-    /* -------------------------------------------------------------------- */
     /* ---------------------------- RENDERIZADO --------------------------- */
     /* -------------------------------------------------------------------- */
     return (
-        <NavegacionEstilos>
-            <span>
+        <header className='navegacion'>
+            <span className='navegacion__bloque'>
                 {`Página ${paginaActual} de ${numeroPaginas}`}
-                <label htmlFor='cafiso-lineas'>Líneas por pág.</label>
+                {mostrarNumeroLineas && (
+                    <>
+                        <label
+                            className='bloque__label'
+                            htmlFor='cafiso-lineas'
+                        >
+                            Líneas por pág.
+                        </label>
 
-                <Selector id='cafiso-lineas' onChange={handleLineas}>
-                    <option>10</option>
-                    <option>20</option>
-                    <option>50</option>
-                </Selector>
+                        <select
+                            className='selector'
+                            id='potiag-lineas'
+                            onChange={handleLineas}
+                        >
+                            <option>10</option>
+                            <option>20</option>
+                            <option>50</option>
+                        </select>
+                    </>
+                )}
             </span>
             {ordenacion && ordenacion.length > 0 && (
-                <span>
-                    <label htmlFor='cafiso-ordenar'>Ordenar por:</label>
-                    <Selector
+                <span className='navegacion__bloque'>
+                    <label className='bloque__label' htmlFor='cafiso-ordenar'>
+                        Ordenar por:
+                    </label>
+                    <select
+                        className='selector'
                         id='cafiso-ordenar'
                         onChange={handleOrdenacion}
                         value={
@@ -60,26 +76,42 @@ const Navegacion = ({
                         {ordenacion.map(campo => (
                             <option key={campo}>{campo}</option>
                         ))}
-                    </Selector>
+                    </select>
                 </span>
             )}
             <span>
-                <BotonNavegacion size={buttonSize} onClick={handlePrimero}>
+                <button
+                    className='boton-navegacion'
+                    size={buttonSize}
+                    onClick={handlePrimero}
+                >
                     <i className='fas fa-caret-left fa-lg'></i>
                     <i className='fas fa-caret-left fa-lg'></i>
-                </BotonNavegacion>
-                <BotonNavegacion size={buttonSize} onClick={handleAnterior}>
+                </button>
+                <button
+                    className='boton-navegacion'
+                    size={buttonSize}
+                    onClick={handleAnterior}
+                >
                     <i className='fas fa-caret-left fa-lg'></i>
-                </BotonNavegacion>
-                <BotonNavegacion size={buttonSize} onClick={handleSiguiente}>
+                </button>
+                <button
+                    className='boton-navegacion'
+                    size={buttonSize}
+                    onClick={handleSiguiente}
+                >
                     <i className='fas fa-caret-right fa-lg'></i>
-                </BotonNavegacion>
-                <BotonNavegacion size={buttonSize} onClick={handleUltimo}>
+                </button>
+                <button
+                    className='boton-navegacion'
+                    size={buttonSize}
+                    onClick={handleUltimo}
+                >
                     <i className='fas fa-caret-right fa-lg'></i>
                     <i className='fas fa-caret-right fa-lg'></i>
-                </BotonNavegacion>
+                </button>
             </span>
-        </NavegacionEstilos>
+        </header>
     )
 }
 

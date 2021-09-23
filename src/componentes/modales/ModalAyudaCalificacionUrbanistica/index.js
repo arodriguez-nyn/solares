@@ -85,6 +85,7 @@ const ModalAyudaCalificacionUrbanistica = ({
                             handleSiguiente={handleSiguiente}
                             handlePrimero={handlePrimero}
                             handleUltimo={handleUltimo}
+                            mostrarNumeroLineas={false}
                         />
                         <TablaAyuda>
                             <thead>

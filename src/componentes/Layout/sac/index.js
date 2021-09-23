@@ -4,21 +4,17 @@ import React, { useEffect, useContext, useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 
 // Componentes
-import Cabecera from '../Cabecera'
+import Cabecera from '../../../componentes/Cabecera'
 import { Main } from './styledComponents'
 import { HistoricoEstilos } from './styledComponents'
 
 // Contexto
-import AppContext from '../../context/AppContext'
+import AppContext from '../../../context/AppContext'
+import SACContext from '../../../context/SACContext'
 
 const Container = ({ children }) => {
-    const {
-        usuario,
-        guardaRegistroActual,
-        guardaRegistroDetalleActual,
-        guardaOrdenacion,
-        guardaUsuario,
-    } = useContext(AppContext)
+    const { guardaRegistroActual, guardaOrdenacion } = useContext(SACContext)
+    const { usuario } = useContext(AppContext)
 
     /* ------------------------------------------------------------------- */
     /* -------------------- CONSTANTES Y DECLARACIONES ------------------- */
@@ -40,42 +36,14 @@ const Container = ({ children }) => {
     useEffect(() => {
         const { pathname } = location
         switch (pathname) {
-            case '/lista':
+            case '/potiag':
                 setHistorialNavegacion([])
                 break
-            case '/formulario':
+            case '/potiag/formulario':
                 setHistorialNavegacion([
                     {
-                        ruta: '/lista',
-                        nombre: 'Lista de Solares',
-                    },
-                ])
-                break
-            case '/lista-detalle':
-                setHistorialNavegacion([
-                    {
-                        ruta: '/lista',
-                        nombre: 'Lista de Solares /',
-                    },
-                    {
-                        ruta: '/formulario',
-                        nombre: 'Formulario',
-                    },
-                ])
-                break
-            case '/formulario-detalle':
-                setHistorialNavegacion([
-                    {
-                        ruta: '/lista',
-                        nombre: 'Lista de Solares /',
-                    },
-                    {
-                        ruta: '/formulario',
-                        nombre: 'Formulario /',
-                    },
-                    {
-                        ruta: '/lista-detalle',
-                        nombre: 'Lista del Detalle de Solares',
+                        ruta: '/potiag',
+                        nombre: 'Lista de Recordatorios',
                     },
                 ])
                 break
@@ -85,29 +53,17 @@ const Container = ({ children }) => {
     useEffect(() => {
         /* Recuperamos el registro actual del localstorage en el caso de que se
            refresque el navegador */
-        const registroString = localStorage.getItem('solares-cafiso')
+        const registroString = localStorage.getItem('sac-potiag')
         const registro = JSON.parse(registroString)
         guardaRegistroActual(registro)
 
-        const registroDetalleString = localStorage.getItem('solares-defiso')
-        const registroDetalle = JSON.parse(registroDetalleString)
-        guardaRegistroDetalleActual(registroDetalle)
-
-        // const autenticacionString = localStorage.getItem('solares-sesion')
-        // const autenticacion = JSON.parse(autenticacionString)
-        // autenticarUsuario(autenticacion)
-
-        const ordenacionString = localStorage.getItem('solares-ordenacion')
+        const ordenacionString = localStorage.getItem('potiag-ordenacion')
         const ordenacion = JSON.parse(ordenacionString)
         guardaOrdenacion(ordenacion)
-
-        const usuarioString = localStorage.getItem('solares-usuario')
-        const usuario = JSON.parse(usuarioString)
-        guardaUsuario(usuario)
     }, [])
 
     useEffect(() => {
-        if (usuario) history.push('/lista')
+        //if (usuario) history.push('/potiag')
     }, [usuario])
 
     /* -------------------------------------------------------------------- */

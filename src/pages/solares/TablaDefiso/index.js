@@ -2,27 +2,23 @@ import React, { useState, useEffect, useContext } from 'react'
 
 // Dependencias
 import { useHistory } from 'react-router-dom'
-import { formateaNumero } from '../../util'
+import { formateaNumero } from '../../../util'
 
 // Componentes
-import {
-    Boton,
-    TablaEstilos,
-    ContenedorTabla,
-    WrapperTabla,
-} from '../../componentes/UI'
-import Alerta from '../../componentes/Alerta'
-import Navegacion from '../../componentes/Navegacion'
-import ModalLoading from '../../componentes/modales/ModalLoading'
+import { Boton, TablaEstilos, WrapperTabla } from '../../../componentes/UI'
+import Alerta from '../../../componentes/Alerta'
+import Navegacion from '../../../componentes/Navegacion'
+import ModalLoading from '../../../componentes/modales/ModalLoading'
+import { ContenedorTabla } from './styledComponents'
 
 // Hooks
-import useNavegacion from '../../hooks/useNavegacion'
+import useNavegacion from '../../../hooks/useNavegacion'
 
 // Contexto
-import AppContext from '../../context/AppContext'
+import SolaresContext from '../../../context/SolaresContext'
 
 // Servicios
-import { obtenerRegistrosDefiso } from '../../services/defiso'
+import { obtenerRegistrosDefiso } from '../../../services/defiso'
 
 import './styles.css'
 
@@ -37,16 +33,18 @@ const TablaDefiso = () => {
         registroDetalleModificado,
         registroDetalleBorrado,
         registroDetalleActual,
+        ordenacionDetalle,
         guardaRegistroDetalleActual,
         setRegistroDetalleCreado,
         setRegistroDetalleModificado,
         setRegistroDetalleBorrado,
         setPaginaDetalle,
-    } = useContext(AppContext)
+        guardaOrdenacionDetalle,
+    } = useContext(SolaresContext)
     const [mensaje, setMensaje] = useState(null)
     const [loading, setLoading] = useState(false)
     const history = useHistory()
-    const ordenacion = [
+    const listaOrdenacion = [
         'F. Entrega',
         'F. Entrega Desc',
         'Agente',
@@ -88,7 +86,6 @@ const TablaDefiso = () => {
             const { success, request } = jsdo
             if (success) {
                 const lista = request.response.dsDEFISO.ttDEFISO
-                console.log(lista)
                 if (lista) {
                     setLista(lista)
                 } else {
@@ -128,9 +125,10 @@ const TablaDefiso = () => {
             repebr: registro.REPEBR,
             repesr: registro.REPESR,
             repofe: registro.REPOFE,
+            recalcularPrecioTotal: false,
         }
         guardaRegistroDetalleActual(defiso)
-        history.push('/formulario-detalle')
+        history.push('/defiso/formulario')
     }
 
     const handleNuevo = () => {
@@ -139,95 +137,177 @@ const TablaDefiso = () => {
         setRegistroDetalleBorrado(null)
         setRegistroDetalleModificado(null)
 
-        history.push('/formulario-detalle')
+        history.push('/solares/defiso/formulario')
     }
 
     const modificaOrdenacion = campo => {
         let campoOrdenacion = ''
         switch (campo) {
             case 'F. Entrega':
-                campoOrdenacion = 'FECENT'
+                campoOrdenacion = {
+                    nombre: 'FECENT',
+                    descripcion: 'F. Entrega',
+                }
                 break
             case 'F. Entrega Desc':
-                campoOrdenacion = 'FECENT DESC'
+                campoOrdenacion = {
+                    nombre: 'FECENT DESC',
+                    descripcion: 'F. Entrega Desc',
+                }
                 break
             case 'Agente':
-                campoOrdenacion = 'AGINMO_NOMBRE'
+                campoOrdenacion = {
+                    nombre: 'AGINMO_NOMBRE',
+                    descripcion: 'Agente',
+                }
                 break
             case 'Agente Desc':
-                campoOrdenacion = 'AGINMO_NOMBRE DESC'
+                campoOrdenacion = {
+                    nombre: 'AGINMO_NOMBRE DESC',
+                    descripcion: 'Agente Desc',
+                }
                 break
             case 'Teléfono':
-                campoOrdenacion = 'NUMTEL'
+                campoOrdenacion = {
+                    nombre: 'NUMTEL',
+                    descripcion: 'Teléfono',
+                }
                 break
             case 'Teléfono Desc':
-                campoOrdenacion = 'NUMTEL DESC'
+                campoOrdenacion = {
+                    nombre: 'NUMTEL DESC',
+                    descripcion: 'Teléfono Desc',
+                }
                 break
             case 'Precio B/R':
-                campoOrdenacion = 'PRECBR'
+                campoOrdenacion = {
+                    nombre: 'PRECBR',
+                    descripcion: 'Precio B/R',
+                }
                 break
             case 'Precio B/R Desc':
-                campoOrdenacion = 'PRECBR DESC'
+                campoOrdenacion = {
+                    nombre: 'PRECBR DESC',
+                    descripcion: 'Precio B/R Desc',
+                }
                 break
             case 'Precio S/R':
-                campoOrdenacion = 'PRECSR'
+                campoOrdenacion = {
+                    nombre: 'PRECSR',
+                    descripcion: 'Precio S/R',
+                }
                 break
             case 'Precio S/R Desc':
-                campoOrdenacion = 'PRECSR DESC'
+                campoOrdenacion = {
+                    nombre: 'PRECSR DESC',
+                    descripcion: 'Precio S/R Desc',
+                }
                 break
             case 'Precio Total':
-                campoOrdenacion = 'PRETOT'
+                campoOrdenacion = {
+                    nombre: 'PRETOT',
+                    descripcion: 'Precio Total',
+                }
                 break
             case 'Precio Total Desc':
-                campoOrdenacion = 'REPCBR DESC'
+                campoOrdenacion = {
+                    nombre: 'PRETOT DESC',
+                    descripcion: 'Precio Total Desc',
+                }
                 break
             case 'Repercusión B/R':
-                campoOrdenacion = 'REPEBR'
+                campoOrdenacion = {
+                    nombre: 'REPEBR',
+                    descripcion: 'Repercusión B/R',
+                }
                 break
             case 'Repercusión B/R Desc':
-                campoOrdenacion = 'REPEBR DESC'
+                campoOrdenacion = {
+                    nombre: 'REPEBR DESC',
+                    descripcion: 'Repercusión B/R Desc',
+                }
                 break
             case 'Repercusión S/R':
-                campoOrdenacion = 'REPESR'
+                campoOrdenacion = {
+                    nombre: 'REPESR',
+                    descripcion: 'Repercusión S/R',
+                }
                 break
             case 'Repercusión S/R Desc':
-                campoOrdenacion = 'REPESR DESC'
+                campoOrdenacion = {
+                    nombre: 'REPESR DESC',
+                    descripcion: 'Repercusión S/R Desc',
+                }
                 break
             case 'Arrendatarios':
-                campoOrdenacion = 'ARREND'
+                campoOrdenacion = {
+                    nombre: 'ARREND',
+                    descripcion: 'Arrendatarios',
+                }
                 break
             case 'Arrendatarios Desc':
-                campoOrdenacion = 'ARREND DESC'
+                campoOrdenacion = {
+                    nombre: 'ARREND DESC',
+                    descripcion: 'Arrendatarios Desc',
+                }
                 break
             case 'Rentabilidad':
-                campoOrdenacion = 'RENTAB'
+                campoOrdenacion = {
+                    nombre: 'RENTAB',
+                    descripcion: 'Rentabilidad',
+                }
                 break
             case 'Rentabilidad Desc':
-                campoOrdenacion = 'RENTAB DESC'
+                campoOrdenacion = {
+                    nombre: 'RENTAB DESC',
+                    descripcion: 'Rentabilidad Desc',
+                }
                 break
             case 'Rep. Arrend':
-                campoOrdenacion = 'REPARR'
+                campoOrdenacion = {
+                    nombre: 'REPARR',
+                    descripcion: 'Rep. Arrend',
+                }
                 break
             case 'Rep. Arrend Desc':
-                campoOrdenacion = 'REPARR DESC'
+                campoOrdenacion = {
+                    nombre: 'REPARR DESC',
+                    descripcion: 'Rep. Arrend Desc',
+                }
                 break
             case 'Oferta NN':
-                campoOrdenacion = 'OFERTA'
+                campoOrdenacion = {
+                    nombre: 'OFERTA',
+                    descripcion: 'Oferta NN',
+                }
                 break
             case 'Oferta NN Desc':
-                campoOrdenacion = 'OFERTA DESC'
+                campoOrdenacion = {
+                    nombre: 'OFERTA DESC',
+                    descripcion: 'Oferta NN Desc',
+                }
                 break
             case 'Rep. Oferta':
-                campoOrdenacion = 'REPOFE'
+                campoOrdenacion = {
+                    nombre: 'REPOFE',
+                    descripcion: 'Rep. Oferta',
+                }
                 break
             case 'Rep. Oferta Desc':
-                campoOrdenacion = 'REPOFE DESC'
+                campoOrdenacion = {
+                    nombre: 'REPOFE DESC',
+                    descripcion: 'Rep. Oferta Desc',
+                }
                 break
         }
 
         setOrderBy(campoOrdenacion)
+        guardaOrdenacionDetalle(campoOrdenacion)
     }
 
+    const limpiaAlertas = () => {
+        setMensaje(null)
+    }
     // Hook para la paginación
     const {
         paginaActual,
@@ -244,6 +324,7 @@ const TablaDefiso = () => {
     } = useNavegacion({
         tabla,
         obtenerRegistros,
+        limpiaAlertas,
     })
 
     /* -------------------------------------------------------------------- */
@@ -251,6 +332,9 @@ const TablaDefiso = () => {
     /* -------------------------------------------------------------------- */
     useEffect(() => {
         if (!registroActual) return
+
+        if (ordenacionDetalle && ordenacionDetalle.nombre)
+            setOrderBy(ordenacionDetalle.nombre)
 
         const ablFilter = registroActual
             ? `NUMFIC = ${registroActual.numfic}`
@@ -269,7 +353,7 @@ const TablaDefiso = () => {
         if (registroDetalleBorrado) {
             setMensaje('Registro borrado correctamente.')
         }
-    }, [registroActual, registroDetalleActual])
+    }, [registroActual, registroDetalleActual, ordenacionDetalle])
 
     useEffect(() => {
         setPaginaDetalle(paginaActual)
@@ -286,7 +370,8 @@ const TablaDefiso = () => {
                 <WrapperTabla>
                     {lista && (
                         <Navegacion
-                            ordenacion={ordenacion}
+                            campoOrdenacion={ordenacionDetalle}
+                            ordenacion={listaOrdenacion}
                             paginaActual={paginaActual}
                             numeroPaginas={numeroPaginas}
                             handleAnterior={handleAnterior}

@@ -9,12 +9,12 @@ import {
     IconoBuscar,
     IconoBorrar,
     BotonDisabled,
-} from '../../componentes/UI'
+} from '../../../componentes/UI'
 import { FormularioEstilos, BloqueCampo } from './styledComponents'
-import Alerta from '../../componentes/Alerta'
-import ModalConfirmacion from '../../componentes/modales/ModalConfirmacion'
-import ModalAyudaTipoFinca from '../../componentes/modales/ModalAyudaTipoFinca'
-import ModalAyudaCalificacionUrbanistica from '../../componentes/modales/ModalAyudaCalificacionUrbanistica'
+import Alerta from '../../../componentes/Alerta'
+import ModalConfirmacion from '../../../componentes/modales/ModalConfirmacion'
+import ModalAyudaTipoFinca from '../../../componentes/modales/ModalAyudaTipoFinca'
+import ModalAyudaCalificacionUrbanistica from '../../../componentes/modales/ModalAyudaCalificacionUrbanistica'
 
 // Dependencias
 import { Formik } from 'formik'
@@ -23,14 +23,14 @@ import { useHistory } from 'react-router-dom'
 import NumberFormat from 'react-number-format'
 
 // Servicios
-import { borrarCafiso, guardarCafiso } from '../../services/cafiso'
+import { borrarCafiso, guardarCafiso } from '../../../services/cafiso'
 
 // Contexto
-import AppContext from '../../context/AppContext'
+import SolaresContext from '../../../context/SolaresContext'
 
 // Hooks
-import useLeaveTipfin from '../../hooks/leave/useLeaveTipfin'
-import useLeaveCalurb from '../../hooks/leave/useLeaveCalurb'
+import useLeaveTipfin from '../../../hooks/leave/useLeaveTipfin'
+import useLeaveCalurb from '../../../hooks/leave/useLeaveCalurb'
 
 import styles from './styles.module.css'
 
@@ -68,11 +68,15 @@ const FormularioCafiso = () => {
         setRegistroCreado,
         setRegistroModificado,
         setRegistroBorrado,
-    } = useContext(AppContext)
+    } = useContext(SolaresContext)
     const [mensaje, setMensaje] = useState(null)
 
     const validationSchema = Yup.object({
-        ficgen: Yup.number().required().min(1),
+        ficgen: Yup.string()
+            .required()
+            .test('NoCero', ficgen => {
+                return ficgen !== '0'
+            }),
         tipfin: Yup.number().required().min(1),
         califi: Yup.number().required().min(1),
     })
@@ -112,7 +116,7 @@ const FormularioCafiso = () => {
         }
     }
 
-    const handleSubmit = async (e, values) => {
+    const handleSubmit = (e, values) => {
         e.preventDefault()
 
         if (!values) {
@@ -137,80 +141,12 @@ const FormularioCafiso = () => {
                     setRegistroCreado(true)
                 }
 
-                history.push('/lista')
+                history.push('/solares/cafiso/lista')
             } else {
                 const error = respuesta.request.response._errors[0]._errorMsg
                 gestionErrores(error)
             }
         })
-
-        // obtenerConexion().then(() => {
-        //     const jsdo = new progress.data.JSDO({ name: 'cafiso' })
-        //     const dataSet = {
-        //         NUMFIC: numfic,
-        //         DIRECC: direcc,
-        //         LOCALI: locali,
-        //         TIPFIN: tipfin,
-        //         CALIFI: califi,
-        //         CALURB: calurb,
-        //         EDACSR: edacsr,
-        //         EDACBR: edacbr,
-        //         EDPOSR: edposr,
-        //         EDPOBR: edpobr,
-        //         PROSOL: prosol,
-        //         SUPSOL: supsol,
-        //         ARM: arm,
-        //         PROFED: profed,
-        //         LONGFA: longfa,
-        //         FICGEN: ficgen,
-        //     }
-
-        //     /* Por defecto anulamos el state de las operaciones para que no salgan
-        //        los mensajes en la pantalla de la lista
-        //     */
-        //     setRegistroCreado(null)
-        //     setRegistroBorrado(null)
-        //     setRegistroModificado(null)
-
-        //     if (!registroActual) {
-        //         // Nuevo registro
-        //         jsdo.add(dataSet)
-        //         jsdo.saveChanges(useSubmit).then(
-        //             jsdo => {
-        //                 const { success } = jsdo
-        //                 if (success) {
-        //                     setRegistroCreado(true)
-        //                     history.push('/lista')
-        //                 }
-        //             },
-        //             error => {
-        //                 gestionErrores(error)
-        //             }
-        //         )
-        //     } else {
-        //         jsdo.fill(`NUMFIC = ${registroActual.numfic}`)
-        //             .then(respuesta => {
-        //                 const cafiso = jsdo.ttCAFISO.findById(
-        //                     respuesta.jsdo.getId()
-        //                 )
-        //                 cafiso.assign(dataSet)
-
-        //                 return jsdo.saveChanges(useSubmit)
-        //             })
-        //             .then(
-        //                 jsdo => {
-        //                     const { success } = jsdo
-        //                     if (success) {
-        //                         setRegistroModificado(true)
-        //                         history.push('/lista')
-        //                     }
-        //                 },
-        //                 error => {
-        //                     gestionErrores(error)
-        //                 }
-        //             )
-        //     }
-        // })
     }
 
     const handleBorrar = () => {
@@ -230,65 +166,6 @@ const FormularioCafiso = () => {
         setRegistroModificado(null)
 
         borrarCafiso(registroActual).then(() => setRegistroBorrado(true))
-
-        // const {
-        //     ficgen,
-        //     direcc,
-        //     numfic,
-        //     locali,
-        //     prosol,
-        //     tipfin,
-        //     califi,
-        //     calurb,
-        //     supsol,
-        //     profed,
-        //     arm,
-        //     longfa,
-        //     edacsr,
-        //     edacbr,
-        //     edposr,
-        //     edpobr,
-        // } = registroActual
-
-        // obtenerConexion().then(() => {
-        //     const jsdo = new progress.data.JSDO({ name: 'cafiso' })
-        //     const dataSet = {
-        //         NUMFIC: numfic,
-        //         DIRECC: direcc,
-        //         LOCALI: locali,
-        //         TIPFIN: tipfin,
-        //         CALIFI: califi,
-        //         CALURB: calurb,
-        //         EDACSR: edacsr,
-        //         EDACBR: edacbr,
-        //         EDPOSR: edposr,
-        //         EDPOBR: edpobr,
-        //         PROSOL: prosol,
-        //         SUPSOL: supsol,
-        //         ARM: arm,
-        //         PROFED: profed,
-        //         LONGFA: longfa,
-        //         FICGEN: ficgen,
-        //     }
-
-        //     jsdo.fill(`NUMFIC = ${registroActual.numfic}`)
-        //         .then(
-        //             respuesta => {
-        //                 const cafiso = jsdo.ttCAFISO.findById(
-        //                     respuesta.jsdo.getId()
-        //                 )
-        //                 cafiso.remove(dataSet)
-
-        //                 return jsdo.saveChanges(useSubmit)
-        //             },
-        //             () => {
-        //                 console.log('Error while reading records.')
-        //             }
-        //         )
-        //         .then(() => {
-        //             setRegistroBorrado(true)
-        //         })
-        // })
     }
 
     const handleCancelarConfirmacion = () => {
@@ -360,39 +237,26 @@ const FormularioCafiso = () => {
         formRef.current.setFieldValue('calurbDescri', '')
     }
 
-    // const handleKeyDownTipfin = (e, setFieldValue, value) => {
-    //     e.preventDefault()
-
-    //     console.log(value)
-
-    //     if (e.key === 'F5') setAyudaTipoFinca(true)
-    //     else {
-    //         setFieldValue('tipfin', value + e.key)
-    //     }
-    // }
-
-    // const handleKeyDownCalifi = e => {
-    //     e.preventDefault()
-
-    //     if (e.key === 'F5') setAyudaCalificacionUrbanistica(true)
-    // }
-
     const handleDetalle = () => {
-        history.push('/lista-detalle')
+        history.push('/defiso')
     }
 
     /* Leave del campo tipfin: buscamos la descripción del valor introducido */
-    const handleBlurTipfin = e => {
+    const handleBlurTipfin = (e, setFieldValue) => {
         const nuevoValor = parseInt(e.target.value)
 
         leaveTipfin(nuevoValor, setFieldValue)
     }
 
     /* Leave del campo califi: buscamos la descripción del valor introducido */
-    const handleBlurCalurb = e => {
+    const handleBlurCalurb = (e, setFieldValue) => {
         const nuevoValor = parseInt(e.target.value)
 
         leaveCalurb(nuevoValor, setFieldValue)
+    }
+
+    const handleDocumentacion = () => {
+        history.push('/cafiso/documentacion')
     }
 
     /* -------------------------------------------------------------------- */
@@ -414,7 +278,7 @@ const FormularioCafiso = () => {
     useEffect(() => {
         if (!registroCreado && !registroModificado && !registroBorrado) return
 
-        history.push('/lista')
+        history.push('/solares/cafiso/lista')
     }, [registroCreado, registroModificado, registroBorrado])
 
     /* -------------------------------------------------------------------- */
@@ -453,7 +317,6 @@ const FormularioCafiso = () => {
                         isValid,
                         dirty,
                         handleBlur,
-                        handleChange,
                         setFieldValue,
                     } = formik
                     return (
@@ -618,7 +481,10 @@ const FormularioCafiso = () => {
                                                             (tipfinRef.current = el)
                                                         }
                                                         onBlur={e =>
-                                                            handleBlurTipfin(e)
+                                                            handleBlurTipfin(
+                                                                e,
+                                                                setFieldValue
+                                                            )
                                                         }
                                                     />
                                                 ) : (
@@ -790,6 +656,7 @@ const FormularioCafiso = () => {
                                                 id='calurb'
                                                 type='text'
                                                 value={values.calurb}
+                                                disabled
                                                 onChange={e =>
                                                     setFieldValue(
                                                         'calurb',
@@ -886,15 +753,15 @@ const FormularioCafiso = () => {
                                         <div>
                                             <label>Longitud</label>
                                             <NumberFormat
-                                                id='profed'
-                                                name='profed'
+                                                id='longfa'
+                                                name='longfa'
                                                 alineacion='right'
-                                                value={values.profed}
+                                                value={values.longfa}
                                                 allowNegative={false}
                                                 thousandSeparator={true}
                                                 onChange={e =>
                                                     setFieldValue(
-                                                        'profed',
+                                                        'longfa',
                                                         e.target.value
                                                     )
                                                 }
@@ -943,15 +810,15 @@ const FormularioCafiso = () => {
                                                 Actual b/Rasante
                                             </label>
                                             <NumberFormat
-                                                id='edabsr'
-                                                name='edabsr'
+                                                id='edacbr'
+                                                name='edacbr'
                                                 alineacion='right'
-                                                value={values.edabsr}
+                                                value={values.edacbr}
                                                 allowNegative={false}
                                                 thousandSeparator={true}
                                                 onChange={e =>
                                                     setFieldValue(
-                                                        'edabsr',
+                                                        'edacbr',
                                                         e.target.value
                                                     )
                                                 }
@@ -1072,6 +939,13 @@ const FormularioCafiso = () => {
                                                 Guardar
                                             </BotonDisabled>
                                         )}
+                                        <Boton
+                                            width='200px'
+                                            type='button'
+                                            onClick={handleDocumentacion}
+                                        >
+                                            Documentación
+                                        </Boton>
                                     </div>
                                 </footer>
                             </section>

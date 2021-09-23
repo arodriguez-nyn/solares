@@ -2,6 +2,10 @@ import { progress } from '@progress/jsdo-core'
 
 const serviceURI = 'http://localhost:7020/nynweb'
 const catalogURI = 'http://localhost:7020/nynweb/static/nynwebService.json'
+
+// const serviceURI = 'https://192.168.1.210:8841/nynweb'
+// const catalogURI = 'https://192.168.1.210:8841/nynweb/static/nynwebService.json'
+
 const authenticationModel = progress.data.Session.AUTH_TYPE_FORM
 const name = 'sesionActualKey'
 
@@ -23,24 +27,25 @@ export const conectar = (username = '', password = '') => {
         })
         .catch(error => {
             console.log(error)
-            return 'Error al iniciar sesión on sesión expirada'
+            return error
         })
 }
 
 export const contarRegistros = (filtro, tabla) => {
     return conectar().then(() => {
         const jsdo = new progress.data.JSDO({ name: tabla })
-        //const filter = { filter: 'TIPFIN = 2' }
         const ablFilter = { filter: filtro }
 
         return jsdo.invoke('count', ablFilter).then(
             jsdo => {
+                console.log('jsdo contarRegistros', jsdo)
                 if (jsdo.success) {
                     const numeroRegistros = jsdo.request.response.numRecs
                     return numeroRegistros
                 }
             },
             error => {
+                console.log('error contarRegistros', error)
                 return error
             }
         )
@@ -48,10 +53,5 @@ export const contarRegistros = (filtro, tabla) => {
 }
 
 export const cerrarSesion = () => {
-    // return conectar().then(sesion => {
-    //     console.log(sesion)
-    //     return sesion.jsdosession.invalidate()
-    // })
-
     return sesionActual.jsdosession.invalidate()
 }

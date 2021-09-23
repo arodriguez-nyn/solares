@@ -12,6 +12,8 @@ import { cerrarSesion } from '../../services/comun'
 // Contexto
 import AppContext from '../../context/AppContext'
 
+import logo from '/static/img/logo-horiz-nn-rgb-amarillo.svg'
+
 const Cabecera = () => {
     /* ------------------------------------------------------------------- */
     /* -------------------- CONSTANTES Y DECLARACIONES ------------------- */
@@ -41,10 +43,7 @@ const Cabecera = () => {
     return (
         <WrapperEstilos>
             <CabeceraEstilos>
-                <img
-                    src='static/img/logo-horiz-nn-rgb-amarillo.svg'
-                    alt='Logo'
-                />
+                <img src={logo} alt='Logo' />
                 {usuario && (
                     <div onClick={handleClick}>
                         <span title='Cerrar la sesión'>

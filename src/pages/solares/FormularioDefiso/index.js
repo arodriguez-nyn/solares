@@ -9,11 +9,12 @@ import {
     IconoBuscar,
     IconoBorrar,
     BotonDisabled,
-} from '../../componentes/UI'
+} from '../../../componentes/UI'
 import { FormularioEstilos, BloqueCampo } from './styledComponents'
-import Alerta from '../../componentes/Alerta'
-import ModalConfirmacion from '../../componentes/modales/ModalConfirmacion'
-import ModalAyudaAgente from '../../componentes/modales/ModalAyudaAgente'
+import Alerta from '../../../componentes/Alerta'
+import ModalConfirmacion from '../../../componentes/modales/ModalConfirmacion'
+import ModalAyudaAgente from '../../../componentes/modales/ModalAyudaAgente'
+import ModalConfirmacionRecalculo from '../../../componentes/modales/ModalConfirmacionRecalculo'
 
 // Dependencias
 import { Formik } from 'formik'
@@ -22,13 +23,13 @@ import { useHistory } from 'react-router-dom'
 import NumberFormat from 'react-number-format'
 
 // Contexto
-import AppContext from '../../context/AppContext'
+import SolaresContext from '../../../context/SolaresContext'
 
 // Servicios
-import { borrarDefiso, guardarDefiso } from '../../services/defiso'
+import { borrarDefiso, guardarDefiso } from '../../../services/defiso'
 
 // Hooks
-import useLeaveAginmo from '../../hooks/leave/useLeaveAginmo'
+import useLeaveAginmo from '../../../hooks/leave/useLeaveAginmo'
 
 import styles from './styles.module.css'
 
@@ -71,12 +72,16 @@ const FormularioDefiso = () => {
         setRegistroDetalleCreado,
         setRegistroDetalleModificado,
         setRegistroDetalleBorrado,
-    } = useContext(AppContext)
+    } = useContext(SolaresContext)
     const [mensaje, setMensaje] = useState(null)
     const history = useHistory()
     const [confirmacion, setConfirmacion] = useState(false)
+    const [confirmacionRecalculo, setConfirmacionRecalculo] = useState(false)
     const [errorAgente, setErrorAgente] = useState(false)
     const [ayudaAgente, setAyudaAgente] = useState(false)
+    const [registroDetalleFormulario, setRegistroDetalleFormulario] = useState(
+        null
+    )
 
     // Referencias para acceder al DOM de algunos campos
     const formRef = useRef()
@@ -97,7 +102,7 @@ const FormularioDefiso = () => {
         agenteRef.current.select()
     }
 
-    const handleSubmit = async (e, values) => {
+    const handleSubmit = (e, values) => {
         e.preventDefault()
 
         if (!values) {
@@ -110,127 +115,16 @@ const FormularioDefiso = () => {
             return
         }
 
-        guardarDefiso(values, registroDetalleActual, registroActual).then(
-            respuesta => {
-                /* Por defecto anulamos el state de las operaciones para que no salgan
-                   los mensajes en la pantalla de la lista
-                */
-                setRegistroDetalleCreado(null)
-                setRegistroDetalleBorrado(null)
-                setRegistroDetalleModificado(null)
+        if (
+            parseFloat(values.precbr) + parseFloat(values.precsr) !==
+            parseFloat(values.pretot)
+        ) {
+            setConfirmacionRecalculo(true)
 
-                const { success } = respuesta
+            return
+        }
 
-                if (success) {
-                    if (registroDetalleActual) {
-                        setRegistroDetalleModificado(true)
-                    } else {
-                        setRegistroDetalleCreado(true)
-                    }
-
-                    history.push('/lista-detalle')
-                } else {
-                    console.log(error)
-                    const error =
-                        respuesta.request.response._errors[0]._errorMsg
-                    gestionErrores(error)
-                }
-            }
-        )
-
-        // const {
-        //     numfic,
-        //     numlin,
-        //     agente,
-        //     aginmoNombre,
-        //     arrend,
-        //     codsit,
-        //     fecent,
-        //     numtel,
-        //     oferta,
-        //     precbr,
-        //     precsr,
-        //     pretot,
-        //     rentab,
-        //     reparr,
-        //     repebr,
-        //     repesr,
-        //     repofe,
-        //     observ,
-        // } = values
-
-        // obtenerConexion().then(() => {
-        //     const jsdo = new progress.data.JSDO({ name: 'defiso' })
-        //     const dataSet = {
-        //         NUMFIC: numfic,
-        //         NUMLIN: numlin,
-        //         AGENTE: agente,
-        //         AGINMO_NOMBRE: aginmoNombre,
-        //         ARREND: arrend,
-        //         CODSIT: codsit,
-        //         FECENT: fecent,
-        //         NUMTEL: numtel,
-        //         OBSERV: observ,
-        //         OFERTA: oferta,
-        //         PRECBR: precbr,
-        //         PRECSR: precsr,
-        //         PRETOT: pretot,
-        //         RENTAB: rentab,
-        //         REPARR: reparr,
-        //         REPEBR: repebr,
-        //         REPESR: repesr,
-        //         REPOFE: repofe,
-        //         OBSERV: observ,
-        //     }
-
-        //     /* Por defecto anulamos el state de las operaciones para que no salgan
-        //        los mensajes en la pantalla de la lista
-        //     */
-        //     setRegistroDetalleCreado(null)
-        //     setRegistroDetalleBorrado(null)
-        //     setRegistroDetalleModificado(null)
-
-        //     if (!registroDetalleActual) {
-        //         // Nuevo registro
-        //         jsdo.add(dataSet)
-        //         jsdo.saveChanges(useSubmit).then(
-        //             jsdo => {
-        //                 const { success } = jsdo
-        //                 if (success) {
-        //                     setRegistroDetalleCreado(true)
-        //                     history.push('/lista-detalle')
-        //                 }
-        //             },
-        //             error => {
-        //                 gestionErrores(error)
-        //             }
-        //         )
-        //     } else {
-        //         jsdo.fill(
-        //             `NUMFIC = ${registroDetalleActual.numfic} AND NUMLIN = ${registroDetalleActual.numlin}`
-        //         )
-        //             .then(respuesta => {
-        //                 const defiso = jsdo.ttDEFISO.findById(
-        //                     respuesta.jsdo.getId()
-        //                 )
-        //                 defiso.assign(dataSet)
-
-        //                 return jsdo.saveChanges(useSubmit)
-        //             })
-        //             .then(
-        //                 jsdo => {
-        //                     const { success } = jsdo
-        //                     if (success) {
-        //                         setRegistroDetalleModificado(true)
-        //                         history.push('/lista-detalle')
-        //                     }
-        //                 },
-        //                 error => {
-        //                     gestionErrores(error)
-        //                 }
-        //             )
-        //     }
-        // })
+        setRegistroDetalleFormulario(values)
     }
 
     const handleBorrar = () => {
@@ -252,72 +146,6 @@ const FormularioDefiso = () => {
         borrarDefiso(registroActual, registroDetalleActual).then(() =>
             setRegistroDetalleBorrado(true)
         )
-
-        // const {
-        //     numfic,
-        //     numlin,
-        //     agente,
-        //     aginmoNombre,
-        //     arrend,
-        //     codsit,
-        //     fecent,
-        //     numtel,
-        //     oferta,
-        //     precbr,
-        //     precsr,
-        //     pretot,
-        //     rentab,
-        //     reparr,
-        //     repebr,
-        //     repesr,
-        //     repofe,
-        //     observ,
-        // } = registroActual
-
-        // obtenerConexion().then(() => {
-        //     const jsdo = new progress.data.JSDO({ name: 'defiso' })
-        //     const dataSet = {
-        //         NUMFIC: numfic,
-        //         NUMLIN: numlin,
-        //         AGENTE: agente,
-        //         AGINMO_NOMBRE: aginmoNombre,
-        //         ARREND: arrend,
-        //         CODSIT: codsit,
-        //         FECENT: fecent,
-        //         NUMTEL: numtel,
-        //         OBSERV: observ,
-        //         OFERTA: oferta,
-        //         PRECBR: precbr,
-        //         PRECSR: precsr,
-        //         PRETOT: pretot,
-        //         RENTAB: rentab,
-        //         REPARR: reparr,
-        //         REPEBR: repebr,
-        //         REPESR: repesr,
-        //         REPOFE: repofe,
-        //         OBSERV: observ,
-        //     }
-
-        //     jsdo.fill(
-        //         `NUMFIC = ${registroDetalleActual.numfic} AND NUMLIN = ${registroDetalleActual.numlin}`
-        //     )
-        //         .then(
-        //             respuesta => {
-        //                 const defiso = jsdo.ttDEFISO.findById(
-        //                     respuesta.jsdo.getId()
-        //                 )
-        //                 defiso.remove(dataSet)
-
-        //                 return jsdo.saveChanges(useSubmit)
-        //             },
-        //             () => {
-        //                 console.log('Error while reading records.')
-        //             }
-        //         )
-        //         .then(() => {
-        //             setRegistroDetalleBorrado(true)
-        //         })
-        // })
     }
 
     const handleNuevo = () => {
@@ -379,6 +207,59 @@ const FormularioDefiso = () => {
         leaveAginmo(nuevoValor, setFieldValue)
     }
 
+    const guardarRegistroDefiso = () => {
+        guardarDefiso(
+            registroDetalleFormulario,
+            registroDetalleActual,
+            registroActual
+        ).then(
+            respuesta => {
+                /* Por defecto anulamos el state de las operaciones para que no salgan
+                los mensajes en la pantalla de la lista
+            */
+                setRegistroDetalleCreado(null)
+                setRegistroDetalleBorrado(null)
+                setRegistroDetalleModificado(null)
+
+                const { success } = respuesta
+
+                if (success) {
+                    if (registroDetalleActual) {
+                        setRegistroDetalleModificado(true)
+                    } else {
+                        setRegistroDetalleCreado(true)
+                    }
+
+                    history.push('/lista-detalle')
+                } else {
+                    const error =
+                        respuesta.request.response._errors[0]._errorMsg
+                    console.log('Error controlado', error)
+                    gestionErrores(error)
+                }
+            },
+            error => {
+                console.log('Error', error)
+            }
+        )
+    }
+
+    const handleAceptarConfirmacionRecalculo = () => {
+        setConfirmacionRecalculo(true)
+        setRegistroDetalleFormulario({
+            ...formRef.current.values,
+            recalcularPrecioTotal: true,
+        })
+    }
+
+    const handleCancelarConfirmacionRecalculo = () => {
+        setConfirmacionRecalculo(false)
+        setRegistroDetalleFormulario({
+            ...formRef.current.values,
+            recalcularPrecioTotal: false,
+        })
+    }
+
     /* -------------------------------------------------------------------- */
     /* ---------------------------- USE EFFECTS --------------------------- */
     /* -------------------------------------------------------------------- */
@@ -433,6 +314,12 @@ const FormularioDefiso = () => {
         registroDetalleBorrado,
     ])
 
+    useEffect(() => {
+        if (!registroDetalleFormulario) return
+
+        guardarRegistroDefiso()
+    }, [registroDetalleFormulario])
+
     /* -------------------------------------------------------------------- */
     /* ---------------------------- RENDERIZADO --------------------------- */
     /* -------------------------------------------------------------------- */
@@ -442,6 +329,15 @@ const FormularioDefiso = () => {
                 mostrarModal={confirmacion}
                 handleAceptarConfirmacion={handleAceptarConfirmacion}
                 handleCancelarConfirmacion={handleCancelarConfirmacion}
+            />
+            <ModalConfirmacionRecalculo
+                mostrarModal={confirmacionRecalculo}
+                handleAceptarConfirmacionRecalculo={
+                    handleAceptarConfirmacionRecalculo
+                }
+                handleCancelarConfirmacionRecalculo={
+                    handleCancelarConfirmacionRecalculo
+                }
             />
             <ModalAyudaAgente
                 mostrarModal={ayudaAgente}
@@ -533,12 +429,13 @@ const FormularioDefiso = () => {
                                                 id='fecent'
                                                 type='date'
                                                 value={values.fecent}
-                                                onChange={e =>
+                                                onChange={e => {
+                                                    console.log(e.target.value)
                                                     setFieldValue(
                                                         'fecent',
                                                         e.target.value
                                                     )
-                                                }
+                                                }}
                                                 ref={fecentRef}
                                                 onBlur={handleBlur}
                                             />
@@ -933,12 +830,12 @@ const FormularioDefiso = () => {
                                 </article>
                                 <article>
                                     <div className='linea5'>
-                                        <label htmlFor='repofe'>
+                                        <label htmlFor='observ'>
                                             Comentarios
                                         </label>
                                         <Editor
                                             rows='5'
-                                            id='arrend'
+                                            id='pbserv'
                                             value={values.observ}
                                             onChange={e =>
                                                 setFieldValue(

@@ -18,13 +18,15 @@ export const CabeceraEstilos = styled.div`
     padding-right: 10px;
     background-color: var(--primary-green);
     color: #fff;
+    z-index: 10;
+
     img {
         width: 180px;
         height: auto;
     }
 
-    span {
-        margin-left: 20px;
+    svg {
+        margin-right: 0.2rem;
     }
 
     span:hover {

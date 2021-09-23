@@ -55,10 +55,11 @@ export const Boton = styled.button`
     background-color: transparent;
     transition: all 0.3s ease;
     border-radius: 4px;
-    padding: 0.45rem 1.2rem;
-    font-size: 14px;
+    padding: 0.35rem 0.65rem;
+    font-size: ${props => props.fontSize || '12px'};
     user-select: none;
-    margin-left: 0.5rem;
+
+    margin-left: ${props => props.marginLeft || '0.5rem'};
 
     :hover {
         background-color: var(--primary-yellow);
@@ -81,7 +82,7 @@ export const BotonDisabled = styled.button`
     background-color: var(--secondary-yellow);
     border-radius: 4px;
     padding: 0.25rem 1.2rem;
-    font-size: 14px;
+    font-size: ${props => props.fontSize || '12px'};
     user-select: none;
     margin-left: 0.5rem;
 
@@ -270,8 +271,8 @@ export const TablaAyuda = styled.table`
 
 export const ContenedorTabla = styled.section`
     margin: 0 auto;
-    margin-top: 3rem;
-    min-height: calc(100vh - 3rem);
+    margin-top: 4rem;
+
     background-color: var(--background);
     color: var(--font-color);
     padding: 1rem;

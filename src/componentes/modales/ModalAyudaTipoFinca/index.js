@@ -88,6 +88,7 @@ const ModalAyudaTipoFinca = ({
                             handleSiguiente={handleSiguiente}
                             handlePrimero={handlePrimero}
                             handleUltimo={handleUltimo}
+                            mostrarNumeroLineas={false}
                         />
                         <TablaAyuda>
                             <thead>

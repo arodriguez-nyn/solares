@@ -3,6 +3,9 @@ import { conectar } from './comun'
 
 export const guardarDefiso = (values, registroActual, registroCafiso) => {
     const useSubmit = true
+
+    console.log(values)
+
     const {
         numfic,
         numlin,
@@ -22,6 +25,7 @@ export const guardarDefiso = (values, registroActual, registroCafiso) => {
         repesr,
         repofe,
         observ,
+        recalcularPrecioTotal,
     } = values
 
     return conectar().then(() => {
@@ -46,7 +50,10 @@ export const guardarDefiso = (values, registroActual, registroCafiso) => {
             REPESR: repesr,
             REPOFE: repofe,
             OBSERV: observ,
+            recalcularPrecioTotal,
         }
+
+        console.log('numfic', numfic)
 
         if (!registroActual) {
             // Nuevo registro

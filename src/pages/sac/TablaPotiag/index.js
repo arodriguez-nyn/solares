@@ -2,41 +2,36 @@ import React, { useState, useEffect, useContext } from 'react'
 
 // Dependencias
 import { useHistory } from 'react-router-dom'
-import { formateaNumero } from '../../util'
+import { formateaNumero, formateaFecha } from '../../../util'
 
 // Componentes
-import {
-    Boton,
-    TablaEstilos,
-    ContenedorTabla,
-    WrapperTabla,
-} from '../../componentes/UI'
-import Alerta from '../../componentes/Alerta'
-import Navegacion from '../../componentes/Navegacion'
-import FiltroTablaCafiso from '../../componentes/FiltroTablaCafiso'
-import ModalLoading from '../../componentes/modales/ModalLoading'
+import Alerta from '../../../componentes/Alerta'
+import Navegacion from '../../../componentes/Navegacion'
+//import FiltroTablaPodeag from '../../../componentes/FiltroTablaPodeag'
+import ModalLoading from '../../../componentes/modales/ModalLoading'
 
 // Hooks
-import useNavegacion from '../../hooks/useNavegacion'
+import useNavegacion from '../../../hooks/useNavegacion'
 
 // Contexto
-import AppContext from '../../context/AppContext'
+import SACContext from '../../../context/SACContext'
+import AppContext from '../../../context/AppContext'
 
 // Servicios
-import { obtenerRegistrosCafiso } from '../../services/cafiso'
+import { obtenerRegistrosPotiag } from '../../../services/potiag'
 
 import './styles.css'
 
-const TablaCafiso = () => {
+const TablaPotiag = () => {
     /* -------------------------------------------------------------------- */
     /* --------------------- CONSTANTES Y DECLARACIONES ------------------- */
     /* -------------------------------------------------------------------- */
     const [lista, setLista] = useState([])
+    const { usuario, guardaUsuario } = useContext(AppContext)
     const {
-        usuario,
+        paginaCabecera,
         ordenacion,
         filtroActual,
-        paginaCabecera,
         registroCreado,
         registroModificado,
         registroBorrado,
@@ -45,27 +40,24 @@ const TablaCafiso = () => {
         setRegistroModificado,
         setRegistroBorrado,
         guardaOrdenacion,
-        guardaUsuario,
         setPaginaCabecera,
-    } = useContext(AppContext)
+    } = useContext(SACContext)
     const [mensaje, setMensaje] = useState(null)
     const history = useHistory()
     const [loading, setLoading] = useState(false)
     const listaOrdenacion = [
-        'Carpeta',
-        'Carpeta Desc',
-        'Dirección',
-        'Dirección Desc',
-        'Población',
-        'Población Desc',
-        'Tipo Inmueble',
-        'Tipo Inmueble Desc',
-        'Cal. Urbanística',
-        'Cal. Urbanística Desc',
+        'Ticket',
+        'Ticket Desc',
+        'Destino',
+        'Destino Desc',
+        'Prioridad',
+        'Prioridad Desc',
+        'F. Recordatorio',
+        'F. Recordatorio Desc',
     ]
 
     // Datos para la navegación
-    const tabla = 'cafiso'
+    const tabla = 'potiag'
 
     /* -------------------------------------------------------------------- */
     /* ----------------------------- FUNCIONES ---------------------------- */
@@ -74,12 +66,14 @@ const TablaCafiso = () => {
         if (!usuario) return
 
         setLoading(true)
-        obtenerRegistrosCafiso(filtro).then(
+
+        obtenerRegistrosPotiag(filtro).then(
             jsdo => {
                 setLoading(false)
                 if (!jsdo) {
                     // Sesión caducada
-                    localStorage.removeItem('solares-usuario')
+                    localStorage.removeItem('sac-usuario')
+
                     guardaUsuario(null)
                     history.push('/')
                     return
@@ -87,7 +81,7 @@ const TablaCafiso = () => {
 
                 const { success, request } = jsdo
                 if (success) {
-                    const lista = request.response.dsCAFISO.ttCAFISO
+                    const lista = request.response.dsPOTIAG.ttPOTIAG
                     if (lista) {
                         setLista(lista)
                     } else {
@@ -97,30 +91,8 @@ const TablaCafiso = () => {
                     console.log('jsdo', jsdo)
                 }
             },
-            error => console.log('error TablaCafiso', error)
+            error => console.log('error tablaPotiag', error)
         )
-
-        // if (sesion) {
-        //     obtenerRegistrosCafiso(sesion, filtro).then(jsdo => {
-        //         setLoading(false)
-        //         const { success, request } = jsdo
-        //         if (success) {
-        //             const lista = request.response.dsCAFISO.ttCAFISO
-        //             if (lista) {
-        //                 setLista(lista)
-        //             } else {
-        //                 setLista(null)
-        //             }
-        //         } else {
-        //             console.log(jsdo)
-        //         }
-        //     })
-        // } else {
-        //     setMensaje({
-        //         texto: 'Se ha desconectado la sesión. Vuelve a iniciarla.',
-        //         tipo: 'error',
-        //     })
-        // }
     }
 
     const handleClick = registro => {
@@ -130,29 +102,19 @@ const TablaCafiso = () => {
         setRegistroBorrado(null)
         setRegistroModificado(null)
 
-        const cafiso = {
-            numfic: registro.NUMFIC,
-            direcc: registro.DIRECC,
-            locali: registro.LOCALI,
-            tipfin: registro.TIPFIN,
-            tipfinDescri: registro.TIPFIN_DESCRI,
-            califi: registro.CALIFI,
-            calurb: registro.CALURB_CODIGO,
-            calurbDescri: registro.CALURB_DESCRI,
-            edacsr: registro.EDACSR,
-            edacbr: registro.EDACBR,
-            edposr: registro.EDPOSR,
-            edpobr: registro.EDPOBR,
-            prosol: registro.PROSOL,
-            supsol: registro.SUPSOL,
-            arm: registro.ARM,
-            profed: registro.PROFED,
-            longfa: registro.LONGFA,
-            ficgen: registro.FICGEN,
+        const potiag = {
+            numreg: registro.NUMREG,
+            numtic: registro.NUMTIC,
+            numotr: registro.NUMOTR,
+            destin: registro.DESTIN,
+            priori: registro.PRIORI,
+            fecrec: registro.FECREC,
+            destinDescri: registro.DESTIN_DESCRI,
+            observ: registro.OBSERV,
         }
 
-        guardaRegistroActual(cafiso)
-        history.push('/formulario')
+        guardaRegistroActual(potiag)
+        history.push('/potiag/formulario')
     }
 
     const handleNuevo = () => {
@@ -161,70 +123,64 @@ const TablaCafiso = () => {
         setRegistroBorrado(null)
         setRegistroModificado(null)
 
-        history.push('/formulario')
+        history.push('/potiag/formulario')
     }
 
     const modificaOrdenacion = campo => {
         let campoOrdenacion = ''
         switch (campo) {
-            case 'Carpeta':
-                campoOrdenacion = { nombre: 'FICGEN', descripcion: 'Carpeta' }
+            case 'Ticket':
+                campoOrdenacion = { nombre: 'NUMTIC', descripcion: 'Ticket' }
                 break
-            case 'Carpeta Desc':
+            case 'Ticket Desc':
                 campoOrdenacion = {
-                    nombre: 'FICGEN DESC',
-                    descripcion: 'Carpeta Desc',
+                    nombre: 'NUMTIC DESC',
+                    descripcion: 'Ticket Desc',
                 }
                 break
-            case 'Dirección':
-                campoOrdenacion = { nombre: 'DIRECC', descripcion: 'Dirección' }
+            case 'Destino':
+                campoOrdenacion = { nombre: 'DESTIN', descripcion: 'Destino' }
                 break
-            case 'Dirección Desc':
+            case 'Destino Desc':
                 campoOrdenacion = {
-                    nombre: 'DIRECC DESC',
-                    descripcion: 'Dirección Desc',
+                    nombre: 'DESTIN DESC',
+                    descripcion: 'Destino Desc',
                 }
                 break
-            case 'Población':
+            case 'Prioridad':
                 campoOrdenacion = {
-                    nombre: 'LOCALI',
-                    descripcion: 'Población',
+                    nombre: 'PRIORI',
+                    descripcion: 'Prioridad',
                 }
                 break
-            case 'Población Desc':
+            case 'Prioridad Desc':
                 campoOrdenacion = {
-                    nombre: 'LOCALI DESC',
-                    descripcion: 'Población Desc',
+                    nombre: 'PRIORI DESC',
+                    descripcion: 'Prioridad Desc',
                 }
                 break
-            case 'Tipo Inmueble':
+            case 'F. Recordatorio':
                 campoOrdenacion = {
-                    nombre: 'TIPFIN_DESCRI',
-                    descripcion: 'Tipo Inmueble',
+                    nombre: 'FECREC',
+                    descripcion: 'F. Recordatorio',
                 }
                 break
-            case 'Tipo Inmueble Desc':
+            case 'F. Recordatorio Desc':
                 campoOrdenacion = {
-                    nombre: 'TIPFIN_DESCRI DESC',
-                    descripcion: 'Tipo Inmueble Desc',
-                }
-                break
-            case 'Cal. Urbanística':
-                campoOrdenacion = {
-                    nombre: 'CALURB_CODIGO',
-                    descripcion: 'Cal. Urbanística',
-                }
-                break
-            case 'Cal. Urbanística Desc':
-                campoOrdenacion = {
-                    nombre: 'CALURB_CODIGO DESC',
-                    descripcion: 'Cal. Urbanística Desc',
+                    nombre: 'FECREC DESC',
+                    descripcion: 'F. Recordatorio Desc',
                 }
                 break
         }
-
         setOrderBy(campoOrdenacion)
         guardaOrdenacion(campoOrdenacion)
+    }
+
+    const limpiaAlertas = () => {
+        setRegistroCreado(null)
+        setRegistroBorrado(null)
+        setRegistroModificado(null)
+        setMensaje(null)
     }
 
     // Hook para la paginación
@@ -243,6 +199,7 @@ const TablaCafiso = () => {
     } = useNavegacion({
         tabla,
         obtenerRegistros,
+        limpiaAlertas,
     })
 
     /* -------------------------------------------------------------------- */
@@ -252,6 +209,7 @@ const TablaCafiso = () => {
         if (!usuario) return
 
         if (ordenacion && ordenacion.nombre) setOrderBy(ordenacion.nombre)
+
         setAblFilter(filtroActual)
         setPaginaActual(paginaCabecera ? paginaCabecera : 1)
 
@@ -277,7 +235,6 @@ const TablaCafiso = () => {
     }, [usuario, filtroActual, ordenacion])
 
     useEffect(() => {
-        //setPagina(paginaActual)
         setPaginaCabecera(paginaActual)
     }, [paginaActual])
 
@@ -287,10 +244,10 @@ const TablaCafiso = () => {
     return (
         <>
             <ModalLoading mostrarModal={loading} color='#fff' />
-            <ContenedorTabla>
-                <h1>Solares</h1>
-                <WrapperTabla>
-                    <FiltroTablaCafiso obtenerRegistros={obtenerRegistros} />
+            <section className='wrapper-tabla'>
+                <h1 className='wrapper-tabla__h1'>Recordatorio de Tickets</h1>
+                <div className='contenedor-tabla'>
+                    {/* <FiltroTablaPodeag obtenerRegistros={obtenerRegistros} /> */}
                     {lista && (
                         <Navegacion
                             campoOrdenacion={ordenacion}
@@ -305,61 +262,72 @@ const TablaCafiso = () => {
                             modificaOrdenacion={modificaOrdenacion}
                         />
                     )}
-                    <h2>Listado de Solares</h2>
+                    <h2 className='contenedor-tabla__h2'>
+                        Recordatorios Registrados
+                    </h2>
                     {mensaje && (
                         <Alerta mensaje={mensaje.texto} tipo={mensaje.tipo} />
                     )}
-                    <TablaEstilos>
-                        <thead>
-                            <tr>
-                                <th>Carpeta</th>
-                                <th>Dirección</th>
-                                <th>Población</th>
-                                <th>Propietario</th>
-                                <th>Tipo Inmueble</th>
-                                <th>Cal. Urb</th>
+                    <table className='tabla'>
+                        <thead className='tabla__thead'>
+                            <tr className='thead__tr'>
+                                <th className='tabla__th'>Ticket</th>
+                                <th className='tabla__th'>OT</th>
+                                <th className='tabla__th'>Destino</th>
+                                <th className='tabla__th'>Prioridad</th>
+                                <th className='tabla__th'>F. Recordatorio</th>
+                                <th className='tabla__th'>Observaciones</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className='tabla__tbody'>
                             {lista &&
                                 lista.length > 0 &&
                                 lista.map(registro => (
                                     <tr
+                                        className='tabla__tr'
                                         onClick={() => handleClick(registro)}
-                                        key={registro.NUMFIC}
+                                        key={registro.NUMREG}
                                     >
-                                        <td className='align-right'>
-                                            {formateaNumero(registro.FICGEN)}
+                                        <td className='tabla__td align-right'>
+                                            {formateaNumero(registro.NUMTIC)}
                                         </td>
-                                        <td>{registro.DIRECC}</td>
-                                        <td>{registro.LOCALI}</td>
-                                        <td>{registro.PROSOL}</td>
-                                        <td>{registro.TIPFIN_DESCRI}</td>
-                                        <td className='align-center'>
-                                            {registro.CALURB_CODIGO}
+                                        <td className='tabla__td align-right'>
+                                            {formateaNumero(registro.NUMOTR)}
+                                        </td>
+                                        <td className='tabla__td'>
+                                            {registro.DESTIN_DESCRI}
+                                        </td>
+                                        <td className='tabla__td'>
+                                            {registro.PRIORI}
+                                        </td>
+                                        <td className='tabla__td align-center'>
+                                            {formateaFecha(registro.FECREC)}
+                                        </td>
+                                        <td className='tabla__td'>
+                                            {registro.OBSERV}
                                         </td>
                                     </tr>
                                 ))}
                         </tbody>
-                    </TablaEstilos>
-                    <footer>
+                    </table>
+                    <footer className='contenedor-tabla__footer'>
                         {numeroRegistros !== 0 && (
                             <span>{`${numeroRegistros} ${
                                 numeroRegistros > 0 ? 'registros' : 'registro'
                             }`}</span>
                         )}
-                        <Boton
-                            width='120px'
+                        <button
+                            className='btn btn-nuevo'
                             type='button'
                             onClick={handleNuevo}
                         >
                             Nuevo
-                        </Boton>
+                        </button>
                     </footer>
-                </WrapperTabla>
-            </ContenedorTabla>
+                </div>
+            </section>
         </>
     )
 }
 
-export default TablaCafiso
+export default TablaPotiag

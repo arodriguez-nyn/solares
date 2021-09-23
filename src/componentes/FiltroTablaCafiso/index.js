@@ -46,6 +46,8 @@ const FiltroTablaCafiso = ({ obtenerRegistros }) => {
     const handleSubmit = e => {
         e.preventDefault()
 
+        setFiltroExpandido(false)
+
         // Montamos los filtros
         const filtroCarpeta =
             inputFiltro.carpeta === '' || inputFiltro.carpeta === 0
@@ -117,6 +119,7 @@ const FiltroTablaCafiso = ({ obtenerRegistros }) => {
     }
 
     const handleLimpiar = () => {
+        setFiltroExpandido(false)
         setInputFiltro({
             carpeta: 0,
             direccion: '',

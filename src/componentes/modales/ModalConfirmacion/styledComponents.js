@@ -25,7 +25,8 @@ export const ModalEstilos = styled.div`
         border: 1px solid var(--primary-green);
         border-radius: 0.2rem;
         background-color: #fff;
-        z-index: 20;
+        padding: 0.5rem;
+        z-index: 40;
         animation: mostrar-modal 0.8s;
 
         h1 {
